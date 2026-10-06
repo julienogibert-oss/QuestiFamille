@@ -24,7 +24,7 @@ small,.muted{color:var(--muted)}.notice{background:#fff9ed;border:1px solid #fde
 </section></main>
 <script>
 // QuestiFamille V4.4 - fiabilisation
-const API="https://lsnfspsdzvjkrwrjfvgl.supabase.co/functions/v1/questifamille",FAMILY_API="https://lsnfspsdzvjkrwrjfvgl.supabase.co/functions/v1/questifamille-family",BASE=location.origin+location.pathname,invite=new URLSearchParams(location.search).get("invite"),$=id=>document.getElementById(id);
+const API="https://lsnfspsdzvjkrwrjfvgl.supabase.co/functions/v1/questifamille",FAMILY_API="https://lsnfspsdzvjkrwrjfvgl.supabase.co/functions/v1/questifamille-family",REST="https://lsnfspsdzvjkrwrjfvgl.supabase.co/rest/v1/rpc",SUPABASE_PUBLIC_KEY="sb_publishable_9P0dRw7wEQkKFXOklf_iNQ_ygN4cfS_",BASE=location.origin+location.pathname,invite=new URLSearchParams(location.search).get("invite"),$=id=>document.getElementById(id);
 let session=localStorage.getItem("qf_session")||"",state=null,current="home",loadSeq=0;
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 const fmt=d=>d?new Date(d).toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short"}):"Aucune";
@@ -32,6 +32,7 @@ const labels={family_created:"Famille créée",member_joined:"Membre arrivé",me
 async function requestApi(url,action,data={}){const active=document.activeElement,btn=active instanceof HTMLButtonElement?active:null;if(btn)btn.disabled=true;try{const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","x-session-token":session},body:JSON.stringify({action,...data})});const j=await r.json();if(!r.ok)throw new Error(j.error||"Erreur");return j}finally{if(btn&&document.body.contains(btn))btn.disabled=false}}
 async function api(action,data={}){return requestApi(API,action,data)}
 async function familyApi(action,data={}){return requestApi(FAMILY_API,action,data)}
+async function rpcV44(name,data={}){const r=await fetch(`${REST}/${name}`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_PUBLIC_KEY},body:JSON.stringify({p_session_token:session,...data})});let j=null;try{j=await r.json()}catch{}if(!r.ok){const msg=j?.message||j?.hint||j?.details||"Erreur serveur";throw new Error(msg)}return j}
 function localDateTimeValue(value){if(!value)return"";const d=new Date(value);if(Number.isNaN(d.getTime()))return"";const p=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+"T"+p(d.getHours())+":"+p(d.getMinutes())}
 function deadlineIso(){const v=$("dead")?.value||"";if(!v)return null;const d=new Date(v);return Number.isNaN(d.getTime())?null:d.toISOString()}
 function hasUnsavedWork(){const a=document.activeElement;if(a&&["INPUT","TEXTAREA","SELECT"].includes(a.tagName))return true;if(current==="quests"&&($("qform")?.children.length||0)>0)return true;if(current==="shop"&&($("itemform")?.children.length||0)>0)return true;if(current==="family"&&($("inviteOut")?.textContent||"").trim())return true;if(current==="profile"&&state){const nick=$("nick"),av=$("av");if(nick&&nick.value!==(state.me.nickname||""))return true;if(av&&av.value!==(state.me.avatar_emoji||"🙂"))return true}return false}
@@ -49,8 +50,8 @@ function reward(q){let a=q.reward_type==="money"?"💶 "+Number(q.reward_amount|
 function statusInfo(s){return s==="open"?["À faire","st-open","📝"]:s==="submitted"?["En attente","st-submitted","⏳"]:s==="validated"?["Validée","st-validated","✅"]:s==="failed"?["À refaire","st-failed","🔁"]:[s||"Inconnu","st-open","•"]}
 function redemptionLabel(s){return s==="requested"?"Demandée":s==="approved"?"Acceptée":s==="given"?"Remise":s==="cancelled"?"Annulée":s}
 function goalKey(){return "qf_goal_"+state.family.id+"_"+state.me.id}
-function currentGoalId(){return localStorage.getItem(goalKey())||""}
-function setGoalLocal(id){if(id)localStorage.setItem(goalKey(),id);else localStorage.removeItem(goalKey());render()}
+function currentGoalId(){const membership=state?.members?.find(m=>m.person_id===state.me.id);return membership?.goal_shop_item_id||localStorage.getItem(goalKey())||""}
+async function setGoalLocal(id){try{await rpcV44("qf_v44_set_shop_goal",{p_item_id:id||null});if(id)localStorage.setItem(goalKey(),id);else localStorage.removeItem(goalKey());await load(true)}catch(e){alert("Impossible d’enregistrer l’objectif : "+e.message)}}
 function pct(a,b){return b>0?Math.max(0,Math.min(100,Math.round(a/b*100))):100}
 function isToday(d){if(!d)return false;const x=new Date(d),n=new Date();return x.getFullYear()===n.getFullYear()&&x.getMonth()===n.getMonth()&&x.getDate()===n.getDate()}
 function render(){
@@ -122,8 +123,8 @@ async function load(force=false){if(!session)return authView();const seq=++loadS
 function show(id){current=id;document.querySelectorAll(".tab").forEach(x=>x.classList.add("hidden"));$(id).classList.remove("hidden");document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===id))}
 document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>show(b.dataset.tab));
 window.submitQ=async id=>{try{await api("submit_quest",{quest_id:id});load(true)}catch(e){alert(e.message)}};
-window.helpQ=async id=>{const q=state.quests.find(x=>x.id===id),txt=`J’ai besoin d’aide pour la quête : ${q?.title||'ma quête'}`;try{if(navigator.share)await navigator.share({title:'QuestiFamille',text:txt,url:location.origin});else alert(txt)}catch{}};
-window.reviewQ=async(q,p,a)=>{let reason="";if(!a){reason=prompt("Pourquoi cette quête est à refaire ?")||"";if(!reason.trim())return}try{await api("review_quest",{quest_id:q,person_id:p,approve:a,reason});load(true)}catch(e){alert(e.message)}};
+window.helpQ=async id=>{try{await rpcV44("qf_v44_request_help",{p_quest_id:id});alert("Demande d’aide envoyée aux parents 👍");await load(true)}catch(e){alert("Impossible d’envoyer la demande d’aide : "+e.message)}};
+window.reviewQ=async(q,p,a)=>{let reason="";if(!a){reason=prompt("Pourquoi cette quête est à refaire ?")||"";if(!reason.trim())return}try{await rpcV44("qf_v44_review_quest",{p_quest_id:q,p_person_id:p,p_approve:a,p_reason:reason});load(true)}catch(e){alert(e.message)}};
 window.rewardQ=async(q,p)=>{try{await api("reward_given",{quest_id:q,person_id:p});load(true)}catch(e){alert(e.message)}};
 window.roleChange=async(p,r)=>{try{await api("change_role",{person_id:p,role:r});load(true)}catch(e){alert(e.message)}};
 window.removeMember=async(p,name)=>{if(!confirm(`Retirer ${name} de la famille ?`))return;try{await familyApi("remove_member",{person_id:p});load(true)}catch(e){alert(e.message)}};
@@ -134,6 +135,6 @@ window.deleteQ=async id=>{if(confirm("Supprimer cette quête ?"))try{await api("
 window.points=async p=>{let a=prompt("Combien de points ? Mets un nombre négatif pour retirer.");if(a===null)return;let r=prompt("Raison ?","Bonus parent");try{await api("add_points",{person_id:p,amount:Number(a),reason:r||"Ajustement"});load(true)}catch(e){alert(e.message)}};
 window.redeem=async id=>{if(confirm("Utiliser tes points pour cette récompense ?"))try{await api("redeem_shop_item",{item_id:id});load(true)}catch(e){alert(e.message)}};
 window.deleteItem=async id=>{if(confirm("Retirer cet article de la boutique ?"))try{await api("delete_shop_item",{item_id:id});load(true)}catch(e){alert(e.message)}};
-window.reviewRed=async(id,status)=>{let reason="";if(status==="cancelled"){reason=prompt("Raison de l’annulation ?")||"";if(!reason.trim())return}try{await api("review_redemption",{redemption_id:id,status,reason});load(true)}catch(e){alert(e.message)}};
+window.reviewRed=async(id,status)=>{let reason="";if(status==="cancelled"){reason=prompt("Raison de l’annulation ?")||"";if(!reason.trim())return}try{await rpcV44("qf_v44_review_redemption",{p_redemption_id:id,p_status:status,p_reason:reason});load(true)}catch(e){alert(e.message)}};
 if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{})}load(true);setInterval(()=>{if(session&&!hasUnsavedWork())load(false)},10000);
 </script></body></html>
