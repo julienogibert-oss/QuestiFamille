@@ -1,7 +1,15 @@
 <!doctype html>
 <html lang="fr"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#4f46e5"><title>QuestiFamille V5.2</title>
+<meta name="theme-color" content="#5b4cf0" id="themeColorMeta">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="QuestiFamille">
+<link rel="icon" href="/icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<title>QuestiFamille V5.3.1</title>
 <style>
 :root{--p:#5b4cf0;--p2:#7c3aed;--p3:#2563eb;--bg:#f5f6fb;--text:#15182a;--muted:#747b90;--line:#e7e9f2;--ok:#16a34a;--bad:#dc2626;--gold:#f59e0b;--card:#fff;--shadow:0 14px 40px rgba(31,35,72,.09)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 10% 0%,#ede9fe 0,transparent 25rem),linear-gradient(180deg,#f7f7fc,#f2f4fa);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--text);min-height:100vh}
@@ -181,16 +189,110 @@ input:focus,textarea:focus,select:focus{background:var(--surface);box-shadow:0 0
   .profile-avatar{width:50px;height:50px;font-size:27px}
 }
 
+
+/* ===== V5.3 — finitions, accessibilité et PWA ===== */
+.sr-only{
+  position:absolute!important;width:1px!important;height:1px!important;padding:0!important;
+  margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;
+  white-space:nowrap!important;border:0!important
+}
+.skip-link{
+  position:fixed;left:12px;top:-70px;z-index:10000;background:var(--text);color:var(--surface);
+  padding:10px 14px;border-radius:10px;font-weight:800;text-decoration:none;transition:top .16s ease
+}
+.skip-link:focus{top:12px}
+:where(button,input,textarea,select,summary,a):focus-visible{
+  outline:3px solid #8b80ff!important;outline-offset:3px!important
+}
+button{touch-action:manipulation}
+.net-banner{
+  position:sticky;top:0;z-index:9;padding:8px 12px;text-align:center;
+  background:#fff4e8;color:#9a4e08;border-bottom:1px solid #ffd8ae;font-size:13px;font-weight:800
+}
+.net-banner.online{background:#edf9f0;color:#166534;border-color:#ccebd4}
+.pwa-update{
+  position:fixed;left:12px;right:12px;bottom:92px;z-index:9000;max-width:520px;margin:auto;
+  background:var(--surface);border:1px solid var(--line);border-radius:15px;padding:12px;
+  box-shadow:0 14px 35px rgba(24,28,45,.16);display:flex;align-items:center;gap:10px
+}
+.pwa-update span{flex:1;font-size:13px;font-weight:750}
+.install-note{
+  padding:10px 12px;border:1px dashed var(--line);border-radius:12px;background:var(--surface-2);
+  color:var(--muted);font-size:12px
+}
+.nav-label{font-size:10px}
+.tabs button[aria-current="page"]{font-weight:900}
+.success-burst{
+  position:fixed;inset:0;pointer-events:none;z-index:9998;display:grid;place-items:center
+}
+.success-burst .burst-core{
+  width:76px;height:76px;border-radius:50%;display:grid;place-items:center;
+  background:var(--surface);border:3px solid var(--ok);font-size:38px;
+  animation:qfPop .55s ease both;box-shadow:0 12px 40px rgba(0,0,0,.16)
+}
+@keyframes qfPop{
+  0%{transform:scale(.45);opacity:0}
+  55%{transform:scale(1.12);opacity:1}
+  100%{transform:scale(1);opacity:0}
+}
+.quest.just-done{animation:qfGlow .7s ease}
+@keyframes qfGlow{
+  0%,100%{box-shadow:none}
+  50%{box-shadow:0 0 0 5px rgba(22,163,74,.13)}
+}
+.loading-dot{
+  width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block;
+  animation:qfPulse .8s ease infinite alternate;vertical-align:middle;margin-left:4px
+}
+@keyframes qfPulse{from{opacity:.3;transform:scale(.75)}to{opacity:1;transform:scale(1)}}
+[data-theme="dark"] .net-banner{background:#2b2117;color:#ffd19a;border-color:#5a4529}
+[data-theme="dark"] .net-banner.online{background:#17261b;color:#a7efb8;border-color:#2b5034}
+@media(max-width:620px){
+  .pwa-update{bottom:88px}
+}
+
+
+/* ===== V5.3.1 — raccourcis de création ===== */
+.quick-create{
+  margin:14px 0;padding:14px;border:1px solid var(--line);border-radius:17px;
+  background:var(--surface)
+}
+.quick-create-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.quick-create-head h3{margin:0}
+.quick-create-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.quick-create-btn{
+  text-align:left;background:var(--surface-2);color:var(--text);border:1px solid var(--line);
+  box-shadow:none;padding:11px;border-radius:13px;font-weight:780
+}
+.quick-create-btn small{display:block;margin-top:3px;font-weight:600;color:var(--muted)}
+.quick-recent{margin-top:10px}
+.quick-recent summary{
+  cursor:pointer;font-weight:800;color:var(--p);padding:7px 0
+}
+.quick-recent-list{display:grid;gap:7px;margin-top:6px}
+.quick-recent-item{
+  display:flex;align-items:center;gap:9px;padding:9px;border:1px solid var(--line);
+  border-radius:12px;background:var(--surface-2)
+}
+.quick-recent-item .quest-icon{width:39px;height:39px;font-size:20px;border-radius:12px}
+.quick-recent-main{flex:1;min-width:0}
+.quick-recent-main b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.quick-recent-item button{padding:8px 10px;min-height:36px;font-size:12px}
+@media(max-width:420px){.quick-create-grid{grid-template-columns:1fr}}
+
 </style></head><body>
-<header><h1>QuestiFamille</h1><p>Quêtes, points, récompenses et famille</p><button id="bell" class="bell hidden">🔔 <span id="bellCount">0</span></button></header>
-<main><section id="auth" class="card"></section><section id="app" class="hidden">
-<div class="tabs"><button data-tab="home" class="active">🏠<br>Accueil</button><button data-tab="quests">🎯<br>Quêtes</button><button data-tab="shop">🛍️<br>Boutique</button><button data-tab="family">👨‍👩‍👧<br>Famille</button><button data-tab="profile">🙂<br>Profil</button><button data-tab="history">📜<br>Historique</button></div>
+<a class="skip-link" href="#mainContent">Aller au contenu</a>
+<div id="netBanner" class="net-banner hidden" role="status" aria-live="polite"></div>
+<header><h1>QuestiFamille</h1><p>Quêtes, points, récompenses et famille</p><button id="bell" class="bell hidden" aria-label="Ouvrir les notifications">🔔 <span id="bellCount">0</span></button></header>
+<main id="mainContent" tabindex="-1"><section id="auth" class="card"></section><section id="app" class="hidden">
+<nav class="tabs" aria-label="Navigation principale"><button data-tab="home" class="active" aria-current="page" aria-label="Accueil">🏠<br><span class="nav-label">Accueil</span></button><button data-tab="quests" aria-label="Quêtes">🎯<br><span class="nav-label">Quêtes</span></button><button data-tab="shop" aria-label="Boutique">🛍️<br><span class="nav-label">Boutique</span></button><button data-tab="family" aria-label="Famille">👨‍👩‍👧<br><span class="nav-label">Famille</span></button><button data-tab="profile" aria-label="Profil">🙂<br><span class="nav-label">Profil</span></button><button data-tab="history" aria-label="Historique">📜<br><span class="nav-label">Historique</span></button></nav>
 <section id="home" class="card tab"></section><section id="quests" class="card tab hidden"></section><section id="shop" class="card tab hidden"></section><section id="family" class="card tab hidden"></section><section id="profile" class="card tab hidden"></section><section id="history" class="card tab hidden"></section>
 </section></main>
 <script>
-// QuestiFamille V5.2 - personnalisation et badges
+// QuestiFamille V5.3.1 - raccourcis de creation
 const API="https://lsnfspsdzvjkrwrjfvgl.supabase.co/functions/v1/questifamille",FAMILY_API="https://lsnfspsdzvjkrwrjfvgl.supabase.co/functions/v1/questifamille-family",REST="https://lsnfspsdzvjkrwrjfvgl.supabase.co/rest/v1/rpc",SUPABASE_PUBLIC_KEY="sb_publishable_9P0dRw7wEQkKFXOklf_iNQ_ygN4cfS_",BASE=location.origin+location.pathname,invite=new URLSearchParams(location.search).get("invite"),$=id=>document.getElementById(id);
 let session=localStorage.getItem("qf_session")||"",state=null,current="home",loadSeq=0;
+let deferredInstallPrompt=null,swRegistration=null,lastFocusedTab="home";
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 const fmt=d=>d?new Date(d).toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short"}):"Aucune";
 const labels={family_created:"Famille créée",member_joined:"Membre arrivé",member_role_changed:"Rôle modifié",profile_updated:"Profil modifié",quest_created:"Quête créée",quest_updated:"Quête modifiée",quest_deleted:"Quête supprimée",quest_submitted:"Quête terminée",quest_validated:"Quête validée",quest_refused:"Quête refusée",reward_given:"Récompense remise",points_adjusted:"Points modifiés",shop_item_created:"Article boutique ajouté",shop_item_deleted:"Article boutique retiré",shop_item_redeemed:"Récompense boutique demandée",shop_redemption_approved:"Demande boutique approuvée",shop_redemption_given:"Récompense boutique remise",shop_redemption_cancelled:"Demande boutique annulée",invite_created:"Invitation créée",recurring_quest_created:"Quête récurrente créée",recurring_quest_generated:"Quête récurrente générée",recurring_quest_enabled:"Quête récurrente activée",recurring_quest_disabled:"Quête récurrente mise en pause",member_left:"Membre parti",member_removed:"Membre retiré",ownership_transferred:"Propriété transmise",quest_help_requested:"Demande d’aide",shop_goal_changed:"Objectif boutique modifié"};
@@ -209,7 +311,7 @@ function bindDraft(kind,ids,extra=()=>({})){const save=()=>{const data={};ids.fo
 function applyDraft(data,ids){if(!data)return false;ids.forEach(id=>{const el=$(id);if(!el||data[id]===undefined)return;if(el.type==="checkbox")el.checked=!!data[id];else el.value=data[id]});return true}
 function actorName(id){const p=person(id);return p?(p.nickname||p.first_name+" "+p.last_name):"Système"}
 function renderHistoryList(){const box=$("historyList");if(!box)return;const who=$("histWho")?.value||"",type=$("histType")?.value||"all";let rows=state.history.filter(h=>(!who||h.actor_person_id===who)&&(type==="all"||h.action.startsWith(type)));box.innerHTML=rows.map(h=>`<div class="hist"><b>${esc(labels[h.action]||h.action.replaceAll("_"," "))}</b><br><small>${fmt(h.created_at)} · ${esc(actorName(h.actor_person_id))}</small>${h.details?.title?`<p>${esc(h.details.title)}</p>`:""}${h.details?.reason?`<small>Motif : ${esc(h.details.reason)}</small>`:""}</div>`).join("")||'<p class="muted">Aucun élément avec ces filtres.</p>'}
-function authView(){$("app").classList.add("hidden");$("bell").classList.add("hidden");$("auth").classList.remove("hidden");if(invite){$("auth").innerHTML='<h2>👨‍👩‍👧 Rejoindre une famille</h2><p>Tu as reçu une invitation.</p><input id="jf" placeholder="Prénom"><input id="jl" placeholder="Nom"><button id="join">Rejoindre</button>';$("join").onclick=async()=>{try{let r=await api("join_invite",{invite,first_name:$("jf").value,last_name:$("jl").value});session=r.session_token;localStorage.setItem("qf_session",session);history.replaceState({},document.title,BASE);load(true)}catch(e){alert(e.message)}}}else{$("auth").innerHTML='<h2>Créer une famille</h2><input id="fn" placeholder="Nom de famille"><input id="pf" placeholder="Prénom du parent"><input id="pl" placeholder="Nom du parent"><button id="create">Créer la famille</button>';$("create").onclick=async()=>{try{let r=await api("create_family",{family_name:$("fn").value,first_name:$("pf").value,last_name:$("pl").value});session=r.session_token;localStorage.setItem("qf_session",session);load(true)}catch(e){alert(e.message)}}}}
+function authView(){$("app").classList.add("hidden");$("bell").classList.add("hidden");$("auth").classList.remove("hidden");if(invite){$("auth").innerHTML='<h2>👨‍👩‍👧 Rejoindre une famille</h2><p>Tu as reçu une invitation.</p><div class="field"><label for="jf">Prénom</label><input id="jf" autocomplete="given-name" placeholder="Prénom"></div><div class="field"><label for="jl">Nom</label><input id="jl" autocomplete="family-name" placeholder="Nom"></div><button id="join">Rejoindre</button>';$("join").onclick=async()=>{try{let r=await api("join_invite",{invite,first_name:$("jf").value,last_name:$("jl").value});session=r.session_token;localStorage.setItem("qf_session",session);history.replaceState({},document.title,BASE);load(true)}catch(e){alert(e.message)}}}else{$("auth").innerHTML='<h2>Créer une famille</h2><div class="field"><label for="fn">Nom de la famille</label><input id="fn" placeholder="Ex. Famille Martin"></div><div class="field"><label for="pf">Prénom du parent</label><input id="pf" autocomplete="given-name" placeholder="Prénom"></div><div class="field"><label for="pl">Nom du parent</label><input id="pl" autocomplete="family-name" placeholder="Nom"></div><button id="create">Créer la famille</button>';$("create").onclick=async()=>{try{let r=await api("create_family",{family_name:$("fn").value,first_name:$("pf").value,last_name:$("pl").value});session=r.session_token;localStorage.setItem("qf_session",session);load(true)}catch(e){alert(e.message)}}}}
 function person(id){return state.members.find(m=>m.person_id===id)}function bal(id){return Number(state.balances?.[id]||0)}
 function reward(q){let a=q.reward_type==="money"?"💶 "+Number(q.reward_amount||0).toFixed(2).replace(".",",")+" €":q.reward_type==="none"?"🎯 Aucune":({privilege:"🎮",activity:"🎬",object:"🎁",other:"⭐"}[q.reward_type]||"🎁")+" "+esc(q.reward_text||"Récompense");if(q.points_reward)a+=" · ⭐ "+q.points_reward+" pts";return a}
 function statusInfo(s){return s==="open"?["À faire","st-open","📝"]:s==="submitted"?["En attente","st-submitted","⏳"]:s==="validated"?["Validée","st-validated","✅"]:s==="failed"?["À refaire","st-failed","🔁"]:[s||"Inconnu","st-open","•"]}
@@ -222,7 +324,7 @@ function isToday(d){if(!d)return false;const x=new Date(d),n=new Date();return x
 function questIcon(q){const t=((q?.title||"")+" "+(q?.description||"")).toLowerCase();if(/devoir|école|ecole|leçon|lecon|révis|revis/.test(t))return"📚";if(/chambre|lit|ranger|linge/.test(t))return"🛏️";if(/vaisselle|cuisine|repas/.test(t))return"🍽️";if(/table/.test(t))return"🥄";if(/poubelle|déchet|dechet/.test(t))return"🗑️";if(/animal|chien|chat/.test(t))return"🐾";if(/sport|exercice/.test(t))return"⚽";return q?.quest_type==="collective"?"🤝":"🎯"}
 function shopEmoji(i){const t=((i?.title||"")+" "+(i?.description||"")).toLowerCase();if(/console|jeu|gaming/.test(t))return"🎮";if(/ciné|cine|film/.test(t))return"🎬";if(/dessert|bonbon|gâteau|gateau|restaurant|repas/.test(t))return"🍰";if(/sortie|parc|activité|activite/.test(t))return"🎟️";if(/argent|euro|€/.test(t))return"💶";if(/livre/.test(t))return"📚";return"🎁"}
 function friendlyDue(d){if(!d)return"Sans échéance";const x=new Date(d),n=new Date(),tom=new Date(n);tom.setDate(n.getDate()+1);const same=a=>a.getFullYear()===x.getFullYear()&&a.getMonth()===x.getMonth()&&a.getDate()===x.getDate();const time=x.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}).replace(":"," h ");if(same(n))return"Aujourd’hui à "+time;if(same(tom))return"Demain à "+time;return x.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})+" à "+time}
-function toast(msg){const old=document.querySelector(".toast");if(old)old.remove();const el=document.createElement("div");el.className="toast";el.textContent=msg;document.body.appendChild(el);requestAnimationFrame(()=>el.classList.add("show"));setTimeout(()=>{el.classList.remove("show");setTimeout(()=>el.remove(),220)},2200)}
+function toast(msg){const old=document.querySelector(".toast");if(old)old.remove();const el=document.createElement("div");el.className="toast";el.setAttribute("role","status");el.setAttribute("aria-live","polite");el.textContent=msg;document.body.appendChild(el);requestAnimationFrame(()=>el.classList.add("show"));setTimeout(()=>{el.classList.remove("show");setTimeout(()=>el.remove(),220)},2200)}
 const PROFILE_COLORS={
   violet:{name:"Violet",main:"#6d5df0",soft:"#ece9ff"},
   blue:{name:"Bleu",main:"#2563eb",soft:"#e8f0ff"},
@@ -277,19 +379,75 @@ async function setProfileColor(colorId){
     toast("Couleur de profil enregistrée 🎨");
   }catch(e){alert("Impossible d’enregistrer la couleur : "+e.message)}
 }
-function applyPrefs(){const theme=localStorage.getItem("qf_theme")||"light";document.documentElement.dataset.theme=theme;document.documentElement.classList.toggle("reduce-motion",localStorage.getItem("qf_reduce_motion")==="1")}
+
+function isStandalone(){return window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true}
+function syncThemeMeta(){
+  const dark=document.documentElement.dataset.theme==="dark";
+  const meta=$("themeColorMeta");if(meta)meta.setAttribute("content",dark?"#11131a":"#5b4cf0");
+}
+function networkState(){
+  const b=$("netBanner");if(!b)return;
+  if(navigator.onLine){b.textContent="Connexion rétablie ✅";b.className="net-banner online";setTimeout(()=>b.classList.add("hidden"),1800)}
+  else{b.textContent="Mode hors ligne — certaines actions seront disponibles au retour d’Internet";b.className="net-banner"}
+}
+function successBurst(){
+  if(document.documentElement.classList.contains("reduce-motion"))return;
+  const el=document.createElement("div");el.className="success-burst";el.setAttribute("aria-hidden","true");
+  el.innerHTML='<div class="burst-core">✅</div>';document.body.appendChild(el);setTimeout(()=>el.remove(),700)
+}
+function showUpdateReady(reg){
+  if(document.querySelector(".pwa-update"))return;
+  const box=document.createElement("div");box.className="pwa-update";
+  box.innerHTML='<span>Une nouvelle version de QuestiFamille est prête.</span><button id="applyUpdate">Mettre à jour</button>';
+  document.body.appendChild(box);
+  $("applyUpdate").onclick=()=>{if(reg.waiting)reg.waiting.postMessage({type:"SKIP_WAITING"})};
+}
+async function installApp(){
+  if(isStandalone()){toast("QuestiFamille est déjà installée 📱");return}
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    const choice=await deferredInstallPrompt.userChoice.catch(()=>null);
+    if(choice?.outcome==="accepted")toast("Installation lancée 📱");
+    deferredInstallPrompt=null;
+    render();
+    return;
+  }
+  toast("Dans le menu du navigateur, choisis « Ajouter à l’écran d’accueil »");
+}
+async function registerPWA(){
+  if(!("serviceWorker" in navigator))return;
+  try{
+    swRegistration=await navigator.serviceWorker.register("/sw.js");
+    if(swRegistration.waiting)showUpdateReady(swRegistration);
+    swRegistration.addEventListener("updatefound",()=>{
+      const w=swRegistration.installing;if(!w)return;
+      w.addEventListener("statechange",()=>{
+        if(w.state==="installed"&&navigator.serviceWorker.controller)showUpdateReady(swRegistration)
+      });
+    });
+    navigator.serviceWorker.addEventListener("controllerchange",()=>location.reload());
+  }catch(e){console.warn("Service worker",e)}
+}
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstallPrompt=e;if(state&&current==="profile")render()});
+window.addEventListener("appinstalled",()=>{deferredInstallPrompt=null;toast("QuestiFamille est installée 🎉");if(state&&current==="profile")render()});
+window.addEventListener("online",()=>{networkState();if(session)load(false)});
+window.addEventListener("offline",networkState);
+
+function applyPrefs(){const theme=localStorage.getItem("qf_theme")||"light";document.documentElement.dataset.theme=theme;document.documentElement.classList.toggle("reduce-motion",localStorage.getItem("qf_reduce_motion")==="1");syncThemeMeta()}
 function setTheme(v){localStorage.setItem("qf_theme",v);applyPrefs();render()}
 function setReduceMotion(v){localStorage.setItem("qf_reduce_motion",v?"1":"0");applyPrefs();render()}
 applyPrefs();
 function render(){
-$("auth").classList.add("hidden");$("app").classList.remove("hidden");$("bell").classList.remove("hidden");const manager=["owner","adult"].includes(state.me.role),owner=state.me.role==="owner",unread=state.notifications.filter(n=>!n.read_at).length;$("bellCount").textContent=unread;
+$("auth").classList.add("hidden");$("app").classList.remove("hidden");$("bell").classList.remove("hidden");const manager=["owner","adult"].includes(state.me.role),owner=state.me.role==="owner",unread=state.notifications.filter(n=>!n.read_at).length;$("bellCount").textContent=unread;$("bell").setAttribute("aria-label",unread?`Notifications, ${unread} non lue${unread>1?"s":""}`:"Notifications");
 const myAss=state.assignments.filter(a=>a.person_id===state.me.id),myOpen=myAss.filter(a=>a.status==="open"),mySubmitted=myAss.filter(a=>a.status==="submitted"),myValidated=myAss.filter(a=>a.status==="validated"),submitted=state.assignments.filter(a=>a.status==="submitted"),toGive=state.assignments.filter(a=>a.status==="validated"&&!a.reward_given);
 const myColor=state.me.profile_color||colorOfPerson(state.me.id),heroBadges=unlockedAchievements().slice(0,3),heroNote=manager?(submitted.length?`${submitted.length} validation${submitted.length>1?"s":""} à regarder`:"Tout est à jour pour le moment ✅"):(myOpen.length?`${myOpen.length} quête${myOpen.length>1?"s":""} à faire`:"Toutes tes quêtes sont faites 🎉");const hero=`<div class="hero profile-hero" style="${profileStyle(myColor)}"><div class="section-kicker">${manager?"Espace parent":"Mon espace"}</div><div class="hero-person"><span class="profile-avatar">${esc(state.me.avatar_emoji||"🙂")}</span><div><h2>Bonjour ${esc(state.me.nickname||state.me.first_name)} 👋</h2><p>Famille <b>${esc(state.family.name)}</b> · <span class="badge">${state.me.role==="owner"?"👑 Créateur / Parent":state.me.role==="adult"?"🧑 Adulte":"👦 Enfant"}</span></p></div></div><p class="hero-note">${heroNote}</p>${heroBadges.length?`<div class="hero-badges">${heroBadges.map(b=>`<span class="hero-badge">${b.icon} ${esc(b.title)}</span>`).join("")}</div>`:""}</div>`;
 if(manager){
   const kids=state.members.filter(m=>m.role==="child");
   const childCards=kids.map(k=>{const ass=state.assignments.filter(a=>a.person_id===k.person_id),todo=ass.filter(a=>a.status==="open").length,wait=ass.filter(a=>a.status==="submitted").length,done=ass.filter(a=>a.status==="validated").length,c=colorInfo(colorOfPerson(k.person_id));return `<div class="child-card member-accent" style="--member-color:${c.main}"><div class="member-main"><span class="avatar" style="border:2px solid ${c.main};background:${c.soft}">${esc(k.avatar_emoji||"🙂")}</span><span><b>${esc(k.nickname||k.first_name)}</b><br><small>⭐ ${bal(k.person_id)} pts · ${todo} à faire · ${wait} en attente · ${done} validée(s)</small></span></div></div>`}).join("");
   const validations=submitted.slice(0,6).map(a=>{const q=state.quests.find(x=>x.id===a.quest_id),p=person(a.person_id);return `<div class="validation-card"><div class="quest-card-head"><span class="quest-icon">${questIcon(q)}</span><div class="quest-card-main"><b>${esc(q?.title||"Quête")}</b><br><small>${esc(p?.nickname||p?.first_name||"Membre")} · ${q?.points_reward?"⭐ "+q.points_reward+" pts":"Sans points"}</small></div></div><div class="row" style="margin-top:10px"><button class="ok" onclick="reviewQ('${q?.id}','${a.person_id}',true)">✔️ Valider</button><button class="gold" onclick="reviewQ('${q?.id}','${a.person_id}',false)">🔁 À refaire</button></div></div>`}).join("");
-  $("home").innerHTML=hero+`<div class="parent-priority"><div class="section-title"><h3>⏳ À valider maintenant</h3><span class="badge">${submitted.length}</span></div>${validations||'<div class="mini"><b>✅ Tout est à jour</b><br><small>Aucune validation en attente.</small></div>'}</div><div class="stats compact"><div class="stat"><small>À valider</small><b>${submitted.length}</b></div><div class="stat"><small>À remettre</small><b>${toGive.length}</b></div><div class="stat"><small>Enfants</small><b>${kids.length}</b></div><div class="stat"><small>Quêtes</small><b>${state.quests.length}</b></div></div><div class="section-title"><h3>Résumé des enfants</h3></div><div class="child-summary">${childCards||'<p>Aucun enfant dans la famille.</p>'}</div>`;
+  const recentUnique=[];for(const q of state.quests){if(!recentUnique.some(x=>x.title.trim().toLowerCase()===q.title.trim().toLowerCase()))recentUnique.push(q);if(recentUnique.length>=4)break}
+  const recentHtml=recentUnique.map(q=>`<div class="quick-recent-item"><span class="quest-icon">${questIcon(q)}</span><div class="quick-recent-main"><b>${esc(q.title)}</b><small>${q.points_reward?`⭐ ${q.points_reward} pts`:"Sans points"} · ${state.assignments.filter(a=>a.quest_id===q.id).length} enfant(s)</small></div><button class="ghost" onclick="quickRepeatQuest('${q.id}')">Réutiliser</button></div>`).join("");
+  $("home").innerHTML=hero+`<div class="parent-priority"><div class="section-title"><h3>⏳ À valider maintenant</h3><span class="badge">${submitted.length}</span></div>${validations||'<div class="mini"><b>✅ Tout est à jour</b><br><small>Aucune validation en attente.</small></div>'}</div><div class="stats compact"><div class="stat"><small>À valider</small><b>${submitted.length}</b></div><div class="stat"><small>À remettre</small><b>${toGive.length}</b></div><div class="stat"><small>Enfants</small><b>${kids.length}</b></div><div class="stat"><small>Quêtes</small><b>${state.quests.length}</b></div></div><div class="quick-create"><div class="quick-create-head"><h3>⚡ Raccourcis</h3><button class="ghost" onclick="openBlankQuest()">➕ Autre</button></div><div class="quick-create-grid"><button class="quick-create-btn" onclick="quickPreset('devoirs')">📚 Devoirs<small>Créer sans tout retaper</small></button><button class="quick-create-btn" onclick="quickPreset('chambre')">🛏️ Chambre<small>Ranger sa chambre</small></button><button class="quick-create-btn" onclick="quickPreset('vaisselle')">🍽️ Vaisselle<small>Aider après le repas</small></button><button class="quick-create-btn" onclick="quickPreset('table')">🥄 Mettre la table<small>Préparer le repas</small></button></div>${recentHtml?`<details class="quick-recent"><summary>🕘 Réutiliser une quête récente</summary><div class="quick-recent-list">${recentHtml}</div></details>`:""}</div><div class="section-title"><h3>Résumé des enfants</h3></div><div class="child-summary">${childCards||'<p>Aucun enfant dans la famille.</p>'}</div>`;
 }else{
   const openSorted=myOpen.map(a=>({a,q:state.quests.find(q=>q.id===a.quest_id)})).filter(x=>x.q).sort((x,y)=>{const ax=x.q.deadline?new Date(x.q.deadline).getTime():Infinity,ay=y.q.deadline?new Date(y.q.deadline).getTime():Infinity;return ax-ay});
   const next=openSorted[0],others=openSorted.slice(1,6);
@@ -315,22 +473,28 @@ $("shareApp").onclick=async()=>{const url=location.origin;try{if(navigator.share
 if(owner)$("inviteBtn").onclick=async()=>{try{let r=await api("create_invite");$("inviteOut").innerHTML=`<p class="link">${esc(r.link)}</p><button id="copy">📋 Copier le lien</button>`;$("copy").onclick=()=>navigator.clipboard.writeText(r.link)}catch(e){alert(e.message)}};
 if(!owner)$("leaveBtn").onclick=async()=>{if(!confirm("Quitter cette famille ? Tu perdras l’accès à ses quêtes et à sa boutique."))return;try{await familyApi("leave_family");localStorage.removeItem("qf_session");session="";location.href=location.origin}catch(e){alert(e.message)}};
 const allBadges=achievementsForMe(),unlockedCount=allBadges.filter(b=>b.unlocked).length,currentColor=state.me.profile_color||"violet",currentColorInfo=colorInfo(currentColor);
-$("profile").innerHTML=`<div class="section-kicker">Personnalisation V5.2</div><h2>${manager?"🧑 Mon profil parent":"🙂 Mon profil"}</h2><div class="profile-preview" style="${profileStyle(currentColor)}"><span class="profile-preview-avatar" style="${profileStyle(currentColor)}">${esc(state.me.avatar_emoji||"🙂")}</span><div><b>${esc(state.me.nickname||state.me.first_name)}</b><br><small>${state.me.role==="owner"?"👑 Créateur / Parent":state.me.role==="adult"?"🧑 Adulte":"👦 Enfant"} · <span class="profile-chip">🏅 ${unlockedCount}/${allBadges.length} badges</span></small></div></div><div class="field"><label>Choisir un avatar</label><div class="avatar-picker">${AVATAR_PRESETS.map(a=>`<button type="button" class="avatar-choice ${a===(state.me.avatar_emoji||"🙂")?"selected":""}" data-avatar="${a}">${a}</button>`).join("")}</div></div><div class="field"><label for="av">Ou utiliser un autre emoji</label><input id="av" value="${esc(state.me.avatar_emoji||"🙂")}" placeholder="🙂"></div><div class="field"><label for="nick">Surnom</label><input id="nick" value="${esc(state.me.nickname||"")}" placeholder="Ton surnom"></div><div class="field"><label>Couleur du profil</label><div class="color-picker">${Object.entries(PROFILE_COLORS).map(([id,c])=>`<button type="button" class="color-choice ${id===currentColor?"selected":""}" data-color="${id}" title="${c.name}" aria-label="${c.name}" style="background:${c.main}"></button>`).join("")}</div><small>Cette couleur est synchronisée entre tes appareils.</small></div><button id="saveProfile">💾 Enregistrer le profil</button><div class="section-title"><h3>🏅 Mes badges</h3><span class="badge">${unlockedCount}/${allBadges.length}</span></div><div class="badge-grid">${allBadges.map(b=>`<div class="badge-card ${b.unlocked?"unlocked":"locked"}"><div class="badge-icon">${b.unlocked?b.icon:"🔒"}</div><b>${esc(b.title)}</b><small>${esc(b.desc)}</small></div>`).join("")}</div><div class="pref-grid"><div class="pref-row"><span><b>🌙 Mode sombre</b><br><small>Plus confortable le soir</small></span><button id="themeToggle" class="soft">${document.documentElement.dataset.theme==="dark"?"Désactiver":"Activer"}</button></div><div class="pref-row"><span><b>✨ Réduire les animations</b><br><small>Pour une interface plus calme</small></span><button id="motionToggle" class="soft">${localStorage.getItem("qf_reduce_motion")==="1"?"Réactiver":"Réduire"}</button></div><div class="pref-row"><span><b>🔔 Notifications</b><br><small>Recevoir les rappels du téléphone</small></span><button id="notifyDevice" class="ghost">Activer</button></div></div>`;
+$("profile").innerHTML=`<div class="section-kicker">Personnalisation V5.2</div><h2>${manager?"🧑 Mon profil parent":"🙂 Mon profil"}</h2><div class="profile-preview" style="${profileStyle(currentColor)}"><span class="profile-preview-avatar" style="${profileStyle(currentColor)}">${esc(state.me.avatar_emoji||"🙂")}</span><div><b>${esc(state.me.nickname||state.me.first_name)}</b><br><small>${state.me.role==="owner"?"👑 Créateur / Parent":state.me.role==="adult"?"🧑 Adulte":"👦 Enfant"} · <span class="profile-chip">🏅 ${unlockedCount}/${allBadges.length} badges</span></small></div></div><div class="field"><label>Choisir un avatar</label><div class="avatar-picker">${AVATAR_PRESETS.map(a=>`<button type="button" class="avatar-choice ${a===(state.me.avatar_emoji||"🙂")?"selected":""}" data-avatar="${a}">${a}</button>`).join("")}</div></div><div class="field"><label for="av">Ou utiliser un autre emoji</label><input id="av" value="${esc(state.me.avatar_emoji||"🙂")}" placeholder="🙂"></div><div class="field"><label for="nick">Surnom</label><input id="nick" value="${esc(state.me.nickname||"")}" placeholder="Ton surnom"></div><div class="field"><label>Couleur du profil</label><div class="color-picker">${Object.entries(PROFILE_COLORS).map(([id,c])=>`<button type="button" class="color-choice ${id===currentColor?"selected":""}" data-color="${id}" title="${c.name}" aria-label="${c.name}" style="background:${c.main}"></button>`).join("")}</div><small>Cette couleur est synchronisée entre tes appareils.</small></div><button id="saveProfile">💾 Enregistrer le profil</button><div class="section-title"><h3>🏅 Mes badges</h3><span class="badge">${unlockedCount}/${allBadges.length}</span></div><div class="badge-grid">${allBadges.map(b=>`<div class="badge-card ${b.unlocked?"unlocked":"locked"}"><div class="badge-icon">${b.unlocked?b.icon:"🔒"}</div><b>${esc(b.title)}</b><small>${esc(b.desc)}</small></div>`).join("")}</div><div class="pref-grid"><div class="pref-row"><span><b>📱 Installer l’application</b><br><small>${isStandalone()?"Installée sur cet appareil":"Accès rapide depuis l’écran d’accueil"}</small></span><button id="installAppBtn" class="ghost">${isStandalone()?"Installée ✅":"Installer"}</button></div><div class="pref-row"><span><b>🌙 Mode sombre</b><br><small>Plus confortable le soir</small></span><button id="themeToggle" class="soft">${document.documentElement.dataset.theme==="dark"?"Désactiver":"Activer"}</button></div><div class="pref-row"><span><b>✨ Réduire les animations</b><br><small>Pour une interface plus calme</small></span><button id="motionToggle" class="soft">${localStorage.getItem("qf_reduce_motion")==="1"?"Réactiver":"Réduire"}</button></div><div class="pref-row"><span><b>🔔 Notifications</b><br><small>Recevoir les rappels du téléphone</small></span><button id="notifyDevice" class="ghost">Activer</button></div></div>`;
 document.querySelectorAll(".avatar-choice").forEach(b=>b.onclick=()=>{const a=b.dataset.avatar;$("av").value=a;document.querySelectorAll(".avatar-choice").forEach(x=>x.classList.toggle("selected",x===b));const pv=document.querySelector(".profile-preview-avatar");if(pv)pv.textContent=a});
 document.querySelectorAll(".color-choice").forEach(b=>b.onclick=()=>setProfileColor(b.dataset.color));
 $("av").oninput=()=>{document.querySelectorAll(".avatar-choice").forEach(x=>x.classList.toggle("selected",x.dataset.avatar===$("av").value));const pv=document.querySelector(".profile-preview-avatar");if(pv)pv.textContent=$("av").value||"🙂"};
 $("saveProfile").onclick=async()=>{try{await api("update_profile",{nickname:$("nick").value,avatar_emoji:$("av").value});toast("Profil enregistré 🙂");load(true)}catch(e){alert(e.message)}};
+$("installAppBtn").onclick=installApp;
 $("themeToggle").onclick=()=>setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");
 $("motionToggle").onclick=()=>setReduceMotion(localStorage.getItem("qf_reduce_motion")!=="1");
 $("notifyDevice").onclick=enablePush;
 $("history").innerHTML=`<h2>📜 Historique</h2><div class="hist-tools"><select id="histWho"><option value="">Tous les membres</option>${state.members.map(m=>`<option value="${m.person_id}">${esc(m.nickname||m.first_name+" "+m.last_name)}</option>`).join("")}</select><select id="histType"><option value="all">Toutes les actions</option><option value="quest_">Quêtes</option><option value="shop_">Boutique</option><option value="points_">Points</option><option value="member_">Famille</option><option value="profile_">Profil</option></select></div><div id="historyList"></div>`;$("histWho").onchange=renderHistoryList;$("histType").onchange=renderHistoryList;renderHistoryList();show(current);if(unread>0&&Notification.permission==="granted"){let n=state.notifications.find(x=>!x.read_at);if(n){const k="qf_local_notif_"+n.id;if(!localStorage.getItem(k)){try{new Notification(n.title,{body:n.message});localStorage.setItem(k,"1")}catch{}}}}
 }
-function questForm(q=null,duplicate=false){let kids=state.members.filter(m=>m.role==="child"),editing=!!q&&!duplicate,source=q||{};$('qform').innerHTML=`<div class="notice">${editing?'':'<div class="draft-note">💾 Brouillon automatique</div>'}<div class="template-row">${!editing?'<button type="button" class="soft qt-template" data-t="devoirs">📚 Devoirs</button><button type="button" class="soft qt-template" data-t="chambre">🛏️ Chambre</button><button type="button" class="soft qt-template" data-t="vaisselle">🍽️ Vaisselle</button><button type="button" class="soft qt-template" data-t="table">🥄 Mettre la table</button>':''}</div><div class="field"><label for="qt">Titre de la quête</label><input id="qt" placeholder="Ex. Ranger sa chambre" value="${esc(source.title||"")}"></div><div class="field"><label for="qd">Description</label><textarea id="qd" placeholder="Ce qu’il faut faire">${esc(source.description||"")}</textarea></div>${editing?'':`<div class="checklist"><b>Pour qui ?</b>${kids.map(c=>`<label><input class="kidcheck" type="checkbox" value="${c.person_id}"> ${esc(c.first_name+' '+c.last_name)}</label>`).join('')}</div><div class="field"><label for="rt">Type de récompense</label><select id="rt"><option value="none">Aucune récompense</option><option value="money">💶 Argent</option><option value="privilege">🎮 Privilège</option><option value="activity">🎬 Activité</option><option value="object">🎁 Objet</option><option value="other">⭐ Autre</option></select></div><div class="field"><label for="rw">Récompense</label><input id="rw" placeholder="Ex. 30 min de console ou 5" value="${esc(source.reward_type==='money'?source.reward_amount||'':source.reward_text||'')}"></div>`}<div class="field"><label for="pts">Points gagnés</label><input id="pts" type="number" min="0" placeholder="Ex. 10" value="${source.points_reward||0}"></div><div class="field"><label for="pen">Conséquence si non terminée</label><input id="pen" placeholder="Facultatif" value="${esc(source.penalty||'')}"></div><div class="field"><label for="dead">Échéance</label><input id="dead" type="datetime-local"></div><button id="saveq">${editing?'Enregistrer':duplicate?'Créer la copie':'Créer'}</button></div>`;
-if(source.deadline){try{$('dead').value=localDateTimeValue(source.deadline)}catch{}}
+function questForm(q=null,duplicate=false,preselectedTargets=[],clearDeadline=false){let kids=state.members.filter(m=>m.role==="child"),editing=!!q&&!duplicate,source=q||{};$('qform').innerHTML=`<div class="notice">${editing?'':'<div class="draft-note">💾 Brouillon automatique</div>'}<div class="template-row">${!editing?'<button type="button" class="soft qt-template" data-t="devoirs">📚 Devoirs</button><button type="button" class="soft qt-template" data-t="chambre">🛏️ Chambre</button><button type="button" class="soft qt-template" data-t="vaisselle">🍽️ Vaisselle</button><button type="button" class="soft qt-template" data-t="table">🥄 Mettre la table</button>':''}</div><div class="field"><label for="qt">Titre de la quête</label><input id="qt" placeholder="Ex. Ranger sa chambre" value="${esc(source.title||"")}"></div><div class="field"><label for="qd">Description</label><textarea id="qd" placeholder="Ce qu’il faut faire">${esc(source.description||"")}</textarea></div>${editing?'':`<div class="checklist"><b>Pour qui ?</b>${kids.map(c=>`<label><input class="kidcheck" type="checkbox" value="${c.person_id}"> ${esc(c.first_name+' '+c.last_name)}</label>`).join('')}</div><div class="field"><label for="rt">Type de récompense</label><select id="rt"><option value="none">Aucune récompense</option><option value="money">💶 Argent</option><option value="privilege">🎮 Privilège</option><option value="activity">🎬 Activité</option><option value="object">🎁 Objet</option><option value="other">⭐ Autre</option></select></div><div class="field"><label for="rw">Récompense</label><input id="rw" placeholder="Ex. 30 min de console ou 5" value="${esc(source.reward_type==='money'?source.reward_amount||'':source.reward_text||'')}"></div>`}<div class="field"><label for="pts">Points gagnés</label><input id="pts" type="number" min="0" placeholder="Ex. 10" value="${source.points_reward||0}"></div><div class="field"><label for="pen">Conséquence si non terminée</label><input id="pen" placeholder="Facultatif" value="${esc(source.penalty||'')}"></div><div class="field"><label for="dead">Échéance</label><input id="dead" type="datetime-local"></div><button id="saveq">${editing?'Enregistrer':duplicate?'Créer la copie':'Créer'}</button></div>`;
+if(source.deadline&&!clearDeadline){try{$('dead').value=localDateTimeValue(source.deadline)}catch{}}
 if(!editing&&source.reward_type)$('rt').value=source.reward_type;
+if(!editing){
+  const wanted=new Set(preselectedTargets||[]);
+  if(!wanted.size&&kids.length===1)wanted.add(kids[0].person_id);
+  document.querySelectorAll(".kidcheck").forEach(c=>{if(wanted.has(c.value))c.checked=true});
+}
 const templates={devoirs:{title:'Faire les devoirs',description:'Terminer les devoirs prévus et préparer les affaires pour demain.'},chambre:{title:'Ranger sa chambre',description:'Ranger les affaires, le sol et remettre la chambre en ordre.'},vaisselle:{title:'Aider pour la vaisselle',description:'Aider à débarrasser, laver ou ranger la vaisselle.'},table:{title:'Mettre la table',description:'Préparer la table avant le repas.'}};
 document.querySelectorAll('.qt-template').forEach(b=>b.addEventListener('click',()=>{const t=templates[b.dataset.t];$('qt').value=t.title;$('qd').value=t.description;if(!editing)saveQuestDraft()}));
-let saveQuestDraft=()=>{};if(!editing){const d=loadDraft('quest');if(d&&!duplicate){applyDraft(d,['qt','qd','rt','rw','pts','pen','dead']);(d.targets||[]).forEach(id=>{const c=[...document.querySelectorAll('.kidcheck')].find(x=>x.value===id);if(c)c.checked=true})}saveQuestDraft=bindDraft('quest',['qt','qd','rt','rw','pts','pen','dead'],()=>({targets:[...document.querySelectorAll('.kidcheck:checked')].map(x=>x.value)}))}
+let saveQuestDraft=()=>{};if(!editing){const d=loadDraft('quest');if(d&&!duplicate&&!preselectedTargets.length){applyDraft(d,['qt','qd','rt','rw','pts','pen','dead']);(d.targets||[]).forEach(id=>{const c=[...document.querySelectorAll('.kidcheck')].find(x=>x.value===id);if(c)c.checked=true})}saveQuestDraft=bindDraft('quest',['qt','qd','rt','rw','pts','pen','dead'],()=>({targets:[...document.querySelectorAll('.kidcheck:checked')].map(x=>x.value)}))}
 $('saveq').onclick=async()=>{try{if(editing){await api('edit_quest',{quest_id:source.id,title:$('qt').value,description:$('qd').value,points_reward:Number($('pts').value||0),penalty:$('pen').value,deadline:deadlineIso()})}else{const targets=[...document.querySelectorAll('.kidcheck:checked')].map(x=>x.value);if(!targets.length){alert('Choisis au moins un enfant.');return}let rt=$('rt').value,rw=$('rw').value,qtype=targets.length===1?'personal':'collective';await api('create_quest',{title:$('qt').value,description:$('qd').value,quest_type:qtype,reward_type:rt,reward_text:rt==='money'?'':rw,reward_amount:rt==='money'?Number(rw||0):0,points_reward:Number($('pts').value||0),penalty:$('pen').value,deadline:deadlineIso(),target_person_id:targets.length===1?targets[0]:null,target_person_ids:targets});clearDraft('quest')}load(true)}catch(e){alert(e.message)}}}
 
 function recurringForm(){
@@ -357,21 +521,24 @@ async function enablePush(){
 
 $("bell").onclick=async()=>{current="home";show("home");$("home").insertAdjacentHTML("afterbegin",'<h3>🔔 Notifications</h3>'+state.notifications.map(n=>`<div class="note ${n.read_at?"":"unread"}"><b>${esc(n.title)}</b><p>${esc(n.message)}</p><small>${fmt(n.created_at)}</small></div>`).join(""));try{await api("mark_notifications_read");$("bellCount").textContent="0"}catch{}};
 async function load(force=false){if(!session)return authView();const seq=++loadSeq;try{const [next,prefs]=await Promise.all([api("state"),rpcV44("qf_v52_profile_preferences",{}).catch(()=>null)]);if(seq!==loadSeq)return;if(prefs){next.me.profile_color=prefs.profile_color||"violet";next.profile_colors=Object.fromEntries((prefs.member_colors||[]).map(x=>[x.person_id,x.profile_color||"violet"]))}else{next.me.profile_color="violet";next.profile_colors={}}if(!force&&hasUnsavedWork()){state=next;return}state=next;render()}catch(e){if(seq!==loadSeq)return;if(String(e.message).includes("Session")){localStorage.removeItem("qf_session");session="";authView()}else alert(e.message)}}
-function show(id){current=id;document.querySelectorAll(".tab").forEach(x=>x.classList.add("hidden"));$(id).classList.remove("hidden");document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===id))}
+function show(id){current=id;lastFocusedTab=id;document.querySelectorAll(".tab").forEach(x=>x.classList.add("hidden"));$(id).classList.remove("hidden");document.querySelectorAll("[data-tab]").forEach(b=>{const active=b.dataset.tab===id;b.classList.toggle("active",active);if(active)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});if(window.innerWidth>620)window.scrollTo({top:0,behavior:document.documentElement.classList.contains("reduce-motion")?"auto":"smooth"})}
 document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>show(b.dataset.tab));
 window.submitQ=async id=>{try{await api("submit_quest",{quest_id:id});toast("Quête envoyée au parent ✅");load(true)}catch(e){alert(e.message)}};
 window.helpQ=async id=>{try{await rpcV44("qf_v44_request_help",{p_quest_id:id});toast("Demande d’aide envoyée aux parents 🙋");await load(true)}catch(e){alert("Impossible d’envoyer la demande d’aide : "+e.message)}};
-window.reviewQ=async(q,p,a)=>{let reason="";if(!a){reason=prompt("Pourquoi cette quête est à refaire ?")||"";if(!reason.trim())return}try{await rpcV44("qf_v44_review_quest",{p_quest_id:q,p_person_id:p,p_approve:a,p_reason:reason});load(true)}catch(e){alert(e.message)}};
-window.rewardQ=async(q,p)=>{try{await api("reward_given",{quest_id:q,person_id:p});load(true)}catch(e){alert(e.message)}};
+window.reviewQ=async(q,p,a)=>{let reason="";if(!a){reason=prompt("Pourquoi cette quête est à refaire ?")||"";if(!reason.trim())return}try{await rpcV44("qf_v44_review_quest",{p_quest_id:q,p_person_id:p,p_approve:a,p_reason:reason});if(a){successBurst();toast("Quête validée 🎉")}else toast("Quête renvoyée à refaire 🔁");load(true)}catch(e){alert(e.message)}};
+window.rewardQ=async(q,p)=>{try{await api("reward_given",{quest_id:q,person_id:p});toast("Récompense marquée comme remise 🎁");load(true)}catch(e){alert(e.message)}};
 window.roleChange=async(p,r)=>{try{await api("change_role",{person_id:p,role:r});load(true)}catch(e){alert(e.message)}};
 window.removeMember=async(p,name)=>{if(!confirm(`Retirer ${name} de la famille ?`))return;try{await familyApi("remove_member",{person_id:p});load(true)}catch(e){alert(e.message)}};
 window.transferOwner=async(p,name)=>{if(!confirm(`Transmettre la propriété de la famille à ${name} ? Tu deviendras adulte.`))return;try{await familyApi("transfer_ownership",{person_id:p});await load(true)}catch(e){alert(e.message)}};
 window.editQ=id=>{show("quests");questForm(state.quests.find(q=>q.id===id))};
-window.duplicateQ=id=>{show("quests");questForm(state.quests.find(q=>q.id===id),true)};
+window.duplicateQ=id=>{const q=state.quests.find(q=>q.id===id),targets=state.assignments.filter(a=>a.quest_id===id).map(a=>a.person_id);show("quests");questForm(q,true,targets,true)};
+window.quickRepeatQuest=id=>{const q=state.quests.find(q=>q.id===id);if(!q)return;const targets=state.assignments.filter(a=>a.quest_id===id).map(a=>a.person_id);show("quests");questForm(q,true,targets,true);toast("Quête préremplie ⚡")};
+window.openBlankQuest=()=>{show("quests");questForm()};
+window.quickPreset=kind=>{const presets={devoirs:{title:"Faire les devoirs",description:"Terminer les devoirs prévus et préparer les affaires pour demain.",points_reward:10,reward_type:"none",reward_text:"",reward_amount:0,penalty:""},chambre:{title:"Ranger sa chambre",description:"Ranger les affaires, le sol et remettre la chambre en ordre.",points_reward:10,reward_type:"none",reward_text:"",reward_amount:0,penalty:""},vaisselle:{title:"Aider pour la vaisselle",description:"Aider à débarrasser, laver ou ranger la vaisselle.",points_reward:8,reward_type:"none",reward_text:"",reward_amount:0,penalty:""},table:{title:"Mettre la table",description:"Préparer la table avant le repas.",points_reward:6,reward_type:"none",reward_text:"",reward_amount:0,penalty:""}};const p=presets[kind];if(!p)return;const kids=state.members.filter(m=>m.role==="child"),targets=kids.length===1?[kids[0].person_id]:[];show("quests");questForm(p,true,targets,true);toast("Raccourci chargé ⚡")};
 window.deleteQ=async id=>{if(confirm("Supprimer cette quête ?"))try{await api("delete_quest",{quest_id:id});load(true)}catch(e){alert(e.message)}};
 window.points=async p=>{let a=prompt("Combien de points ? Mets un nombre négatif pour retirer.");if(a===null)return;let r=prompt("Raison ?","Bonus parent");try{await api("add_points",{person_id:p,amount:Number(a),reason:r||"Ajustement"});load(true)}catch(e){alert(e.message)}};
 window.redeem=async id=>{if(confirm("Utiliser tes points pour cette récompense ?"))try{await api("redeem_shop_item",{item_id:id});toast("Demande envoyée 🎁");load(true)}catch(e){alert(e.message)}};
 window.deleteItem=async id=>{if(confirm("Retirer cet article de la boutique ?"))try{await api("delete_shop_item",{item_id:id});load(true)}catch(e){alert(e.message)}};
-window.reviewRed=async(id,status)=>{let reason="";if(status==="cancelled"){reason=prompt("Raison de l’annulation ?")||"";if(!reason.trim())return}try{await rpcV44("qf_v44_review_redemption",{p_redemption_id:id,p_status:status,p_reason:reason});load(true)}catch(e){alert(e.message)}};
-if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{})}load(true);setInterval(()=>{if(session&&!hasUnsavedWork())load(false)},10000);
+window.reviewRed=async(id,status)=>{let reason="";if(status==="cancelled"){reason=prompt("Raison de l’annulation ?")||"";if(!reason.trim())return}try{await rpcV44("qf_v44_review_redemption",{p_redemption_id:id,p_status:status,p_reason:reason});toast(status==="approved"?"Demande approuvée ✅":status==="given"?"Récompense remise 🎁":"Demande annulée");load(true)}catch(e){alert(e.message)}};
+networkState();registerPWA();load(true);setInterval(()=>{if(session&&!hasUnsavedWork())load(false)},10000);
 </script></body></html>
