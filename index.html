@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="fr"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#4f46e5"><title>QuestiFamille V5.1.1</title>
+<meta name="theme-color" content="#4f46e5"><title>QuestiFamille V5.2</title>
 <style>
 :root{--p:#5b4cf0;--p2:#7c3aed;--p3:#2563eb;--bg:#f5f6fb;--text:#15182a;--muted:#747b90;--line:#e7e9f2;--ok:#16a34a;--bad:#dc2626;--gold:#f59e0b;--card:#fff;--shadow:0 14px 40px rgba(31,35,72,.09)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 10% 0%,#ede9fe 0,transparent 25rem),linear-gradient(180deg,#f7f7fc,#f2f4fa);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--text);min-height:100vh}
@@ -119,6 +119,68 @@ input:focus,textarea:focus,select:focus{background:var(--surface);box-shadow:0 0
   header{position:sticky;top:0;z-index:6}
 }
 
+
+/* ===== V5.2 — personnalisation profil / badges ===== */
+.profile-hero{border-left:4px solid var(--profile-color,#6d5df0)}
+.hero-person{display:flex;align-items:center;gap:13px}
+.hero-person h2{margin:0 0 4px}
+.hero-person p{margin:0}
+.profile-avatar{
+  display:grid;place-items:center;width:54px;height:54px;border-radius:17px;
+  background:var(--surface);font-size:30px;border:2px solid var(--profile-color,#6d5df0);
+  box-shadow:0 0 0 4px var(--profile-soft,#ece9ff);flex:0 0 auto
+}
+.hero-note{margin:11px 0 0!important;font-size:13px;color:var(--muted)}
+.hero-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:11px}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:5px;border-radius:999px;
+  padding:6px 9px;background:var(--surface);border:1px solid var(--line);
+  font-size:11px;font-weight:800
+}
+.avatar-picker,.color-picker{display:flex;gap:9px;flex-wrap:wrap;margin:9px 0 14px}
+.avatar-choice{
+  width:48px;height:48px;padding:0;min-height:48px;border-radius:15px;
+  font-size:25px;background:var(--surface-2);color:var(--text);
+  border:1px solid var(--line);box-shadow:none
+}
+.avatar-choice.selected{outline:3px solid var(--p);background:var(--surface-3)}
+.color-choice{
+  width:40px;height:40px;min-height:40px;border-radius:999px;padding:0;
+  border:3px solid var(--surface);box-shadow:0 0 0 1px var(--line)
+}
+.color-choice.selected{outline:3px solid var(--text);outline-offset:2px}
+.profile-preview{
+  display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--line);
+  border-left:4px solid var(--profile-color,#6d5df0);border-radius:15px;
+  background:var(--surface-2);margin:8px 0 16px
+}
+.profile-preview-avatar{
+  display:grid;place-items:center;width:50px;height:50px;border-radius:15px;
+  font-size:27px;background:var(--surface);
+  border:2px solid var(--profile-color,#6d5df0);
+  box-shadow:0 0 0 4px var(--profile-soft,#ece9ff)
+}
+.badge-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin:10px 0 16px}
+.badge-card{
+  border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--surface);
+  min-height:92px
+}
+.badge-card.unlocked{border-color:#d9d3ff;background:var(--surface-3)}
+.badge-card.locked{opacity:.58;filter:saturate(.55)}
+.badge-icon{font-size:23px;margin-bottom:6px}
+.badge-card b{display:block;font-size:13px}
+.badge-card small{display:block;margin-top:4px}
+.member-accent{border-left:4px solid var(--member-color,#6d5df0)}
+.child-card.member-accent,.member.member-accent{padding-left:12px}
+.profile-chip{
+  display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;
+  background:var(--surface-2);border:1px solid var(--line);font-size:11px;font-weight:800
+}
+@media(max-width:620px){
+  .badge-grid{grid-template-columns:1fr}
+  .profile-avatar{width:50px;height:50px;font-size:27px}
+}
+
 </style></head><body>
 <header><h1>QuestiFamille</h1><p>Quêtes, points, récompenses et famille</p><button id="bell" class="bell hidden">🔔 <span id="bellCount">0</span></button></header>
 <main><section id="auth" class="card"></section><section id="app" class="hidden">
@@ -126,7 +188,7 @@ input:focus,textarea:focus,select:focus{background:var(--surface);box-shadow:0 0
 <section id="home" class="card tab"></section><section id="quests" class="card tab hidden"></section><section id="shop" class="card tab hidden"></section><section id="family" class="card tab hidden"></section><section id="profile" class="card tab hidden"></section><section id="history" class="card tab hidden"></section>
 </section></main>
 <script>
-// QuestiFamille V5.1 - refonte visuelle jeu familial doux
+// QuestiFamille V5.2 - personnalisation et badges
 const API="https://lsnfspsdzvjkrwrjfvgl.supabase.co/functions/v1/questifamille",FAMILY_API="https://lsnfspsdzvjkrwrjfvgl.supabase.co/functions/v1/questifamille-family",REST="https://lsnfspsdzvjkrwrjfvgl.supabase.co/rest/v1/rpc",SUPABASE_PUBLIC_KEY="sb_publishable_9P0dRw7wEQkKFXOklf_iNQ_ygN4cfS_",BASE=location.origin+location.pathname,invite=new URLSearchParams(location.search).get("invite"),$=id=>document.getElementById(id);
 let session=localStorage.getItem("qf_session")||"",state=null,current="home",loadSeq=0;
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
@@ -161,6 +223,60 @@ function questIcon(q){const t=((q?.title||"")+" "+(q?.description||"")).toLowerC
 function shopEmoji(i){const t=((i?.title||"")+" "+(i?.description||"")).toLowerCase();if(/console|jeu|gaming/.test(t))return"🎮";if(/ciné|cine|film/.test(t))return"🎬";if(/dessert|bonbon|gâteau|gateau|restaurant|repas/.test(t))return"🍰";if(/sortie|parc|activité|activite/.test(t))return"🎟️";if(/argent|euro|€/.test(t))return"💶";if(/livre/.test(t))return"📚";return"🎁"}
 function friendlyDue(d){if(!d)return"Sans échéance";const x=new Date(d),n=new Date(),tom=new Date(n);tom.setDate(n.getDate()+1);const same=a=>a.getFullYear()===x.getFullYear()&&a.getMonth()===x.getMonth()&&a.getDate()===x.getDate();const time=x.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}).replace(":"," h ");if(same(n))return"Aujourd’hui à "+time;if(same(tom))return"Demain à "+time;return x.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})+" à "+time}
 function toast(msg){const old=document.querySelector(".toast");if(old)old.remove();const el=document.createElement("div");el.className="toast";el.textContent=msg;document.body.appendChild(el);requestAnimationFrame(()=>el.classList.add("show"));setTimeout(()=>{el.classList.remove("show");setTimeout(()=>el.remove(),220)},2200)}
+const PROFILE_COLORS={
+  violet:{name:"Violet",main:"#6d5df0",soft:"#ece9ff"},
+  blue:{name:"Bleu",main:"#2563eb",soft:"#e8f0ff"},
+  green:{name:"Vert",main:"#16a34a",soft:"#e8f8ed"},
+  orange:{name:"Orange",main:"#ea7a16",soft:"#fff0df"},
+  pink:{name:"Rose",main:"#db4f8a",soft:"#fdeaf2"},
+  teal:{name:"Turquoise",main:"#0f9f9a",soft:"#e5f8f6"}
+};
+const AVATAR_PRESETS=["🙂","😎","🤓","🥳","🦊","🐼","🐯","🐸","🐧","🐱","🐶","🦄","🐨","🐵","🤖","🌟"];
+function colorInfo(id){return PROFILE_COLORS[id]||PROFILE_COLORS.violet}
+function colorOfPerson(id){return state?.profile_colors?.[id]||"violet"}
+function profileStyle(colorId){const c=colorInfo(colorId);return `--profile-color:${c.main};--profile-soft:${c.soft}`}
+function achievementsForMe(){
+  if(!state)return[];
+  const mine=state.assignments.filter(a=>a.person_id===state.me.id);
+  const validated=mine.filter(a=>a.status==="validated");
+  const collective=validated.some(a=>state.quests.find(q=>q.id===a.quest_id)?.quest_type==="collective");
+  const givenRewards=state.redemptions.filter(r=>r.person_id===state.me.id&&r.status==="given").length;
+  const created=state.quests.filter(q=>q.created_by_person_id===state.me.id).length;
+  const recurringCreated=(state.recurring||[]).filter(r=>r.created_by_person_id===state.me.id).length;
+  const shopCreated=(state.shop||[]).filter(i=>i.created_by_person_id===state.me.id).length;
+  const manager=["owner","adult"].includes(state.me.role);
+  if(manager){
+    return [
+      {icon:"🧭",title:"Organisateur",desc:"Créer une première quête",unlocked:created>=1},
+      {icon:"🎯",title:"10 quêtes créées",desc:`${Math.min(created,10)}/10`,unlocked:created>=10},
+      {icon:"🔁",title:"Routine familiale",desc:"Créer une quête répétitive",unlocked:recurringCreated>=1},
+      {icon:"🎁",title:"Boutique ouverte",desc:"Créer une récompense",unlocked:shopCreated>=1},
+      {icon:"👑",title:"Pilote de la famille",desc:"Être propriétaire de la famille",unlocked:state.me.role==="owner"}
+    ];
+  }
+  return [
+    {icon:"🌟",title:"Première quête",desc:"Valider une première quête",unlocked:validated.length>=1},
+    {icon:"🏅",title:"10 quêtes",desc:`${Math.min(validated.length,10)}/10`,unlocked:validated.length>=10},
+    {icon:"🥇",title:"25 quêtes",desc:`${Math.min(validated.length,25)}/25`,unlocked:validated.length>=25},
+    {icon:"🤝",title:"Esprit d’équipe",desc:"Valider un défi collectif",unlocked:collective},
+    {icon:"🎁",title:"Première récompense",desc:"Recevoir une récompense boutique",unlocked:givenRewards>=1}
+  ];
+}
+function unlockedAchievements(){return achievementsForMe().filter(x=>x.unlocked)}
+async function setProfileColor(colorId){
+  if(!PROFILE_COLORS[colorId])return;
+  try{
+    await rpcV44("qf_v52_profile_preferences",{p_profile_color:colorId});
+    state.me.profile_color=colorId;
+    state.profile_colors=state.profile_colors||{};
+    state.profile_colors[state.me.id]=colorId;
+    document.querySelectorAll(".color-choice").forEach(b=>b.classList.toggle("selected",b.dataset.color===colorId));
+    const style=profileStyle(colorId);
+    document.querySelectorAll(".profile-hero,.profile-preview").forEach(el=>el.setAttribute("style",style));
+    const pv=document.querySelector(".profile-preview-avatar");if(pv)pv.setAttribute("style",style);
+    toast("Couleur de profil enregistrée 🎨");
+  }catch(e){alert("Impossible d’enregistrer la couleur : "+e.message)}
+}
 function applyPrefs(){const theme=localStorage.getItem("qf_theme")||"light";document.documentElement.dataset.theme=theme;document.documentElement.classList.toggle("reduce-motion",localStorage.getItem("qf_reduce_motion")==="1")}
 function setTheme(v){localStorage.setItem("qf_theme",v);applyPrefs();render()}
 function setReduceMotion(v){localStorage.setItem("qf_reduce_motion",v?"1":"0");applyPrefs();render()}
@@ -168,10 +284,10 @@ applyPrefs();
 function render(){
 $("auth").classList.add("hidden");$("app").classList.remove("hidden");$("bell").classList.remove("hidden");const manager=["owner","adult"].includes(state.me.role),owner=state.me.role==="owner",unread=state.notifications.filter(n=>!n.read_at).length;$("bellCount").textContent=unread;
 const myAss=state.assignments.filter(a=>a.person_id===state.me.id),myOpen=myAss.filter(a=>a.status==="open"),mySubmitted=myAss.filter(a=>a.status==="submitted"),myValidated=myAss.filter(a=>a.status==="validated"),submitted=state.assignments.filter(a=>a.status==="submitted"),toGive=state.assignments.filter(a=>a.status==="validated"&&!a.reward_given);
-const hero=`<div class="hero"><div class="section-kicker">${manager?"Espace parent":"Mon espace"}</div><h2>${esc(state.me.avatar_emoji||"🙂")} Bonjour ${esc(state.me.nickname||state.me.first_name)} 👋</h2><p>Famille <b>${esc(state.family.name)}</b> · <span class="badge">${state.me.role==="owner"?"👑 Créateur / Parent":state.me.role==="adult"?"🧑 Adulte":"👦 Enfant"}</span></p></div>`;
+const myColor=state.me.profile_color||colorOfPerson(state.me.id),heroBadges=unlockedAchievements().slice(0,3),heroNote=manager?(submitted.length?`${submitted.length} validation${submitted.length>1?"s":""} à regarder`:"Tout est à jour pour le moment ✅"):(myOpen.length?`${myOpen.length} quête${myOpen.length>1?"s":""} à faire`:"Toutes tes quêtes sont faites 🎉");const hero=`<div class="hero profile-hero" style="${profileStyle(myColor)}"><div class="section-kicker">${manager?"Espace parent":"Mon espace"}</div><div class="hero-person"><span class="profile-avatar">${esc(state.me.avatar_emoji||"🙂")}</span><div><h2>Bonjour ${esc(state.me.nickname||state.me.first_name)} 👋</h2><p>Famille <b>${esc(state.family.name)}</b> · <span class="badge">${state.me.role==="owner"?"👑 Créateur / Parent":state.me.role==="adult"?"🧑 Adulte":"👦 Enfant"}</span></p></div></div><p class="hero-note">${heroNote}</p>${heroBadges.length?`<div class="hero-badges">${heroBadges.map(b=>`<span class="hero-badge">${b.icon} ${esc(b.title)}</span>`).join("")}</div>`:""}</div>`;
 if(manager){
   const kids=state.members.filter(m=>m.role==="child");
-  const childCards=kids.map(k=>{const ass=state.assignments.filter(a=>a.person_id===k.person_id),todo=ass.filter(a=>a.status==="open").length,wait=ass.filter(a=>a.status==="submitted").length,done=ass.filter(a=>a.status==="validated").length;return `<div class="child-card"><div class="member-main"><span class="avatar">${esc(k.avatar_emoji||"🙂")}</span><span><b>${esc(k.nickname||k.first_name)}</b><br><small>⭐ ${bal(k.person_id)} pts · ${todo} à faire · ${wait} en attente · ${done} validée(s)</small></span></div></div>`}).join("");
+  const childCards=kids.map(k=>{const ass=state.assignments.filter(a=>a.person_id===k.person_id),todo=ass.filter(a=>a.status==="open").length,wait=ass.filter(a=>a.status==="submitted").length,done=ass.filter(a=>a.status==="validated").length,c=colorInfo(colorOfPerson(k.person_id));return `<div class="child-card member-accent" style="--member-color:${c.main}"><div class="member-main"><span class="avatar" style="border:2px solid ${c.main};background:${c.soft}">${esc(k.avatar_emoji||"🙂")}</span><span><b>${esc(k.nickname||k.first_name)}</b><br><small>⭐ ${bal(k.person_id)} pts · ${todo} à faire · ${wait} en attente · ${done} validée(s)</small></span></div></div>`}).join("");
   const validations=submitted.slice(0,6).map(a=>{const q=state.quests.find(x=>x.id===a.quest_id),p=person(a.person_id);return `<div class="validation-card"><div class="quest-card-head"><span class="quest-icon">${questIcon(q)}</span><div class="quest-card-main"><b>${esc(q?.title||"Quête")}</b><br><small>${esc(p?.nickname||p?.first_name||"Membre")} · ${q?.points_reward?"⭐ "+q.points_reward+" pts":"Sans points"}</small></div></div><div class="row" style="margin-top:10px"><button class="ok" onclick="reviewQ('${q?.id}','${a.person_id}',true)">✔️ Valider</button><button class="gold" onclick="reviewQ('${q?.id}','${a.person_id}',false)">🔁 À refaire</button></div></div>`}).join("");
   $("home").innerHTML=hero+`<div class="parent-priority"><div class="section-title"><h3>⏳ À valider maintenant</h3><span class="badge">${submitted.length}</span></div>${validations||'<div class="mini"><b>✅ Tout est à jour</b><br><small>Aucune validation en attente.</small></div>'}</div><div class="stats compact"><div class="stat"><small>À valider</small><b>${submitted.length}</b></div><div class="stat"><small>À remettre</small><b>${toGive.length}</b></div><div class="stat"><small>Enfants</small><b>${kids.length}</b></div><div class="stat"><small>Quêtes</small><b>${state.quests.length}</b></div></div><div class="section-title"><h3>Résumé des enfants</h3></div><div class="child-summary">${childCards||'<p>Aucun enfant dans la famille.</p>'}</div>`;
 }else{
@@ -190,7 +306,7 @@ let items=state.shop.map(i=>{const points=bal(state.me.id),enough=points>=i.poin
 let reqs=state.redemptions.map(r=>{let item=state.shop.find(i=>i.id===r.shop_item_id),p=person(r.person_id);return `<div class="redeem"><b>${esc(p?.first_name||"Membre")} · ${esc(item?.title||"Récompense")}</b><br><small>${r.points_spent} pts · ${redemptionLabel(r.status)}${r.decision_reason?" · "+esc(r.decision_reason):""}</small>${manager&&r.status!=="given"&&r.status!=="cancelled"?`<div class="row"><button class="ok" onclick="reviewRed('${r.id}','approved')">Approuver</button><button class="gold" onclick="reviewRed('${r.id}','given')">Remise</button><button class="bad" onclick="reviewRed('${r.id}','cancelled')">Annuler</button></div>`:""}</div>`}).join("");
 const myReqs=state.redemptions.filter(r=>r.person_id===state.me.id).map(r=>{let item=state.shop.find(i=>i.id===r.shop_item_id);return `<div class="redeem"><b>${esc(item?.title||"Récompense")}</b><br><small>${redemptionLabel(r.status)} · ${r.points_spent} pts${r.decision_reason?" · "+esc(r.decision_reason):""}</small></div>`}).join("");
 $("shop").innerHTML=`<div class="section-kicker">${manager?"Gestion des récompenses":"Mes récompenses"}</div><h2>🎁 Boutique</h2><p>Tu as <b class="points">⭐ ${bal(state.me.id)} points</b></p>${manager?'<button id="newitem">➕ Ajouter une récompense</button><div id="itemform"></div>':""}<div class="shopgrid">${items||"<p>Aucune récompense pour le moment.</p>"}</div>${manager?`<div class="section-title"><h3>Demandes</h3></div>${reqs||"<p>Aucune demande.</p>"}`:`<div class="my-requests"><div class="section-title"><h3>Mes demandes</h3></div>${myReqs||"<p>Aucune demande pour le moment.</p>"}</div>`}`;if(manager)$("newitem").onclick=()=>{$("itemform").innerHTML='<div class="notice"><div class="draft-note">💾 Brouillon automatique</div><div class="field"><label for="it">Nom de la récompense</label><input id="it" placeholder="Ex. 30 min de console"></div><div class="field"><label for="idc">Conditions ou description</label><textarea id="idc" placeholder="Ex. Après les devoirs, ce week-end…"></textarea></div><div class="field"><label for="ic">Prix en points</label><input id="ic" type="number" min="1" placeholder="Ex. 50"></div><button id="isave">Ajouter la récompense</button></div>';const sd=loadDraft('shop');if(sd)applyDraft(sd,['it','idc','ic']);bindDraft('shop',['it','idc','ic']);$("isave").onclick=async()=>{try{await api("create_shop_item",{title:$("it").value,description:$("idc").value,points_cost:Number($("ic").value)});clearDraft('shop');toast("Récompense ajoutée 🎁");load(true)}catch(e){alert(e.message)}}};
-$("family").innerHTML=`<div class="section-kicker">Gestion familiale</div><h2>👨‍👩‍👧 ${esc(state.family.name)}</h2><p class="muted">${state.members.length} membre(s) dans la famille</p>`+state.members.map(m=>`<div class="member"><div class="member-main"><span class="avatar">${esc(m.avatar_emoji||"🙂")}</span><span style="min-width:0"><b>${esc(m.nickname||m.first_name+" "+m.last_name)}</b><br><small>${m.role==="owner"?"Créateur / propriétaire":m.role==="adult"?"Adulte":"Enfant"} · ⭐ ${bal(m.person_id)} pts</small></span></div><div class="member-actions">${owner&&m.role!=="owner"?`<select class="member-role" data-person-id="${m.person_id}"><option value="child" ${m.role==="child"?"selected":""}>Enfant</option><option value="adult" ${m.role==="adult"?"selected":""}>Adulte</option></select><button class="soft transfer-owner" data-person-id="${m.person_id}">👑 Transmettre</button><button class="bad remove-member" data-person-id="${m.person_id}">Retirer</button>`:""}${manager&&m.role==="child"?`<button class="ghost adjust-points" data-person-id="${m.person_id}">⭐ Points</button>`:""}</div></div>`).join("")+`<div class="share-card"><b>✨ Partager QuestiFamille</b><p class="muted">Tu peux envoyer le site à quelqu’un. Il pourra créer sa propre famille, sans rejoindre la tienne.</p><div class="row"><button id="shareApp">📤 Partager l’application</button>${owner?'<button id="inviteBtn" class="ghost">🔗 Inviter dans ma famille</button>':''}</div><div id="inviteOut"></div></div><div class="danger-zone"><b>Gestion du compte familial</b><p class="muted">${owner?"En tant que créateur, transmets d’abord la propriété si tu veux quitter la famille.":"Tu peux quitter cette famille. Ton accès sera retiré de cet appareil."}</p>${owner?"":'<button id="leaveBtn" class="bad">🚪 Quitter la famille</button>'}</div>`;
+$("family").innerHTML=`<div class="section-kicker">Gestion familiale</div><h2>👨‍👩‍👧 ${esc(state.family.name)}</h2><p class="muted">${state.members.length} membre(s) dans la famille</p>`+state.members.map(m=>{const c=colorInfo(colorOfPerson(m.person_id));return `<div class="member member-accent" style="--member-color:${c.main}"><div class="member-main"><span class="avatar" style="border:2px solid ${c.main};background:${c.soft}">${esc(m.avatar_emoji||"🙂")}</span><span style="min-width:0"><b>${esc(m.nickname||m.first_name+" "+m.last_name)}</b><br><small>${m.role==="owner"?"Créateur / propriétaire":m.role==="adult"?"Adulte":"Enfant"} · ⭐ ${bal(m.person_id)} pts</small></span></div><div class="member-actions">${owner&&m.role!=="owner"?`<select class="member-role" data-person-id="${m.person_id}"><option value="child" ${m.role==="child"?"selected":""}>Enfant</option><option value="adult" ${m.role==="adult"?"selected":""}>Adulte</option></select><button class="soft transfer-owner" data-person-id="${m.person_id}">👑 Transmettre</button><button class="bad remove-member" data-person-id="${m.person_id}">Retirer</button>`:""}${manager&&m.role==="child"?`<button class="ghost adjust-points" data-person-id="${m.person_id}">⭐ Points</button>`:""}</div></div>`}).join("")+`<div class="share-card"><b>✨ Partager QuestiFamille</b><p class="muted">Tu peux envoyer le site à quelqu’un. Il pourra créer sa propre famille, sans rejoindre la tienne.</p><div class="row"><button id="shareApp">📤 Partager l’application</button>${owner?'<button id="inviteBtn" class="ghost">🔗 Inviter dans ma famille</button>':''}</div><div id="inviteOut"></div></div><div class="danger-zone"><b>Gestion du compte familial</b><p class="muted">${owner?"En tant que créateur, transmets d’abord la propriété si tu veux quitter la famille.":"Tu peux quitter cette famille. Ton accès sera retiré de cet appareil."}</p>${owner?"":'<button id="leaveBtn" class="bad">🚪 Quitter la famille</button>'}</div>`;
 document.querySelectorAll(".member-role").forEach(el=>el.addEventListener("change",()=>roleChange(el.dataset.personId,el.value)));
 document.querySelectorAll(".transfer-owner").forEach(el=>el.addEventListener("click",()=>{const m=person(el.dataset.personId);transferOwner(el.dataset.personId,m?.nickname||m?.first_name||"ce membre")}));
 document.querySelectorAll(".remove-member").forEach(el=>el.addEventListener("click",()=>{const m=person(el.dataset.personId);removeMember(el.dataset.personId,m?.nickname||m?.first_name||"ce membre")}));
@@ -198,8 +314,15 @@ document.querySelectorAll(".adjust-points").forEach(el=>el.addEventListener("cli
 $("shareApp").onclick=async()=>{const url=location.origin;try{if(navigator.share){await navigator.share({title:"QuestiFamille",text:"Crée ta propre famille sur QuestiFamille",url})}else{$("inviteOut").innerHTML=`<p class="link">${esc(url)}</p>`}}catch{}};
 if(owner)$("inviteBtn").onclick=async()=>{try{let r=await api("create_invite");$("inviteOut").innerHTML=`<p class="link">${esc(r.link)}</p><button id="copy">📋 Copier le lien</button>`;$("copy").onclick=()=>navigator.clipboard.writeText(r.link)}catch(e){alert(e.message)}};
 if(!owner)$("leaveBtn").onclick=async()=>{if(!confirm("Quitter cette famille ? Tu perdras l’accès à ses quêtes et à sa boutique."))return;try{await familyApi("leave_family");localStorage.removeItem("qf_session");session="";location.href=location.origin}catch(e){alert(e.message)}};
-const validatedCount=myValidated.length,collectiveDone=myValidated.some(a=>state.quests.find(q=>q.id===a.quest_id)?.quest_type==="collective");const badges=[validatedCount>0?"🌟 Première quête":null,validatedCount>=10?"🏅 10 quêtes validées":null,collectiveDone?"🤝 Premier défi collectif":null].filter(Boolean);
-$("profile").innerHTML=`<div class="section-kicker">Personnalisation</div><h2>🙂 Profil</h2><div class="field"><label for="av">Avatar</label><input id="av" value="${esc(state.me.avatar_emoji||"🙂")}" placeholder="🙂"></div><div class="field"><label for="nick">Surnom</label><input id="nick" value="${esc(state.me.nickname||"")}" placeholder="Ton surnom"></div><p><small>Nom : ${esc(state.me.first_name+" "+state.me.last_name)}</small></p><div class="badges">${badges.length?badges.map(b=>`<span class="achievement">${b}</span>`).join(""):'<span class="muted">Tes badges apparaîtront ici au fil des quêtes.</span>'}</div><button id="saveProfile">Enregistrer le profil</button><div class="pref-grid"><div class="pref-row"><span><b>🌙 Mode sombre</b><br><small>Plus confortable le soir</small></span><button id="themeToggle" class="soft">${document.documentElement.dataset.theme==="dark"?"Désactiver":"Activer"}</button></div><div class="pref-row"><span><b>✨ Réduire les animations</b><br><small>Pour une interface plus calme</small></span><button id="motionToggle" class="soft">${localStorage.getItem("qf_reduce_motion")==="1"?"Réactiver":"Réduire"}</button></div><div class="pref-row"><span><b>🔔 Notifications</b><br><small>Recevoir les rappels du téléphone</small></span><button id="notifyDevice" class="ghost">Activer</button></div></div>`;$("saveProfile").onclick=async()=>{try{await api("update_profile",{nickname:$("nick").value,avatar_emoji:$("av").value});toast("Profil enregistré 🙂");load(true)}catch(e){alert(e.message)}};$("themeToggle").onclick=()=>setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");$("motionToggle").onclick=()=>setReduceMotion(localStorage.getItem("qf_reduce_motion")!=="1");$("notifyDevice").onclick=enablePush;
+const allBadges=achievementsForMe(),unlockedCount=allBadges.filter(b=>b.unlocked).length,currentColor=state.me.profile_color||"violet",currentColorInfo=colorInfo(currentColor);
+$("profile").innerHTML=`<div class="section-kicker">Personnalisation V5.2</div><h2>${manager?"🧑 Mon profil parent":"🙂 Mon profil"}</h2><div class="profile-preview" style="${profileStyle(currentColor)}"><span class="profile-preview-avatar" style="${profileStyle(currentColor)}">${esc(state.me.avatar_emoji||"🙂")}</span><div><b>${esc(state.me.nickname||state.me.first_name)}</b><br><small>${state.me.role==="owner"?"👑 Créateur / Parent":state.me.role==="adult"?"🧑 Adulte":"👦 Enfant"} · <span class="profile-chip">🏅 ${unlockedCount}/${allBadges.length} badges</span></small></div></div><div class="field"><label>Choisir un avatar</label><div class="avatar-picker">${AVATAR_PRESETS.map(a=>`<button type="button" class="avatar-choice ${a===(state.me.avatar_emoji||"🙂")?"selected":""}" data-avatar="${a}">${a}</button>`).join("")}</div></div><div class="field"><label for="av">Ou utiliser un autre emoji</label><input id="av" value="${esc(state.me.avatar_emoji||"🙂")}" placeholder="🙂"></div><div class="field"><label for="nick">Surnom</label><input id="nick" value="${esc(state.me.nickname||"")}" placeholder="Ton surnom"></div><div class="field"><label>Couleur du profil</label><div class="color-picker">${Object.entries(PROFILE_COLORS).map(([id,c])=>`<button type="button" class="color-choice ${id===currentColor?"selected":""}" data-color="${id}" title="${c.name}" aria-label="${c.name}" style="background:${c.main}"></button>`).join("")}</div><small>Cette couleur est synchronisée entre tes appareils.</small></div><button id="saveProfile">💾 Enregistrer le profil</button><div class="section-title"><h3>🏅 Mes badges</h3><span class="badge">${unlockedCount}/${allBadges.length}</span></div><div class="badge-grid">${allBadges.map(b=>`<div class="badge-card ${b.unlocked?"unlocked":"locked"}"><div class="badge-icon">${b.unlocked?b.icon:"🔒"}</div><b>${esc(b.title)}</b><small>${esc(b.desc)}</small></div>`).join("")}</div><div class="pref-grid"><div class="pref-row"><span><b>🌙 Mode sombre</b><br><small>Plus confortable le soir</small></span><button id="themeToggle" class="soft">${document.documentElement.dataset.theme==="dark"?"Désactiver":"Activer"}</button></div><div class="pref-row"><span><b>✨ Réduire les animations</b><br><small>Pour une interface plus calme</small></span><button id="motionToggle" class="soft">${localStorage.getItem("qf_reduce_motion")==="1"?"Réactiver":"Réduire"}</button></div><div class="pref-row"><span><b>🔔 Notifications</b><br><small>Recevoir les rappels du téléphone</small></span><button id="notifyDevice" class="ghost">Activer</button></div></div>`;
+document.querySelectorAll(".avatar-choice").forEach(b=>b.onclick=()=>{const a=b.dataset.avatar;$("av").value=a;document.querySelectorAll(".avatar-choice").forEach(x=>x.classList.toggle("selected",x===b));const pv=document.querySelector(".profile-preview-avatar");if(pv)pv.textContent=a});
+document.querySelectorAll(".color-choice").forEach(b=>b.onclick=()=>setProfileColor(b.dataset.color));
+$("av").oninput=()=>{document.querySelectorAll(".avatar-choice").forEach(x=>x.classList.toggle("selected",x.dataset.avatar===$("av").value));const pv=document.querySelector(".profile-preview-avatar");if(pv)pv.textContent=$("av").value||"🙂"};
+$("saveProfile").onclick=async()=>{try{await api("update_profile",{nickname:$("nick").value,avatar_emoji:$("av").value});toast("Profil enregistré 🙂");load(true)}catch(e){alert(e.message)}};
+$("themeToggle").onclick=()=>setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");
+$("motionToggle").onclick=()=>setReduceMotion(localStorage.getItem("qf_reduce_motion")!=="1");
+$("notifyDevice").onclick=enablePush;
 $("history").innerHTML=`<h2>📜 Historique</h2><div class="hist-tools"><select id="histWho"><option value="">Tous les membres</option>${state.members.map(m=>`<option value="${m.person_id}">${esc(m.nickname||m.first_name+" "+m.last_name)}</option>`).join("")}</select><select id="histType"><option value="all">Toutes les actions</option><option value="quest_">Quêtes</option><option value="shop_">Boutique</option><option value="points_">Points</option><option value="member_">Famille</option><option value="profile_">Profil</option></select></div><div id="historyList"></div>`;$("histWho").onchange=renderHistoryList;$("histType").onchange=renderHistoryList;renderHistoryList();show(current);if(unread>0&&Notification.permission==="granted"){let n=state.notifications.find(x=>!x.read_at);if(n){const k="qf_local_notif_"+n.id;if(!localStorage.getItem(k)){try{new Notification(n.title,{body:n.message});localStorage.setItem(k,"1")}catch{}}}}
 }
 function questForm(q=null,duplicate=false){let kids=state.members.filter(m=>m.role==="child"),editing=!!q&&!duplicate,source=q||{};$('qform').innerHTML=`<div class="notice">${editing?'':'<div class="draft-note">💾 Brouillon automatique</div>'}<div class="template-row">${!editing?'<button type="button" class="soft qt-template" data-t="devoirs">📚 Devoirs</button><button type="button" class="soft qt-template" data-t="chambre">🛏️ Chambre</button><button type="button" class="soft qt-template" data-t="vaisselle">🍽️ Vaisselle</button><button type="button" class="soft qt-template" data-t="table">🥄 Mettre la table</button>':''}</div><div class="field"><label for="qt">Titre de la quête</label><input id="qt" placeholder="Ex. Ranger sa chambre" value="${esc(source.title||"")}"></div><div class="field"><label for="qd">Description</label><textarea id="qd" placeholder="Ce qu’il faut faire">${esc(source.description||"")}</textarea></div>${editing?'':`<div class="checklist"><b>Pour qui ?</b>${kids.map(c=>`<label><input class="kidcheck" type="checkbox" value="${c.person_id}"> ${esc(c.first_name+' '+c.last_name)}</label>`).join('')}</div><div class="field"><label for="rt">Type de récompense</label><select id="rt"><option value="none">Aucune récompense</option><option value="money">💶 Argent</option><option value="privilege">🎮 Privilège</option><option value="activity">🎬 Activité</option><option value="object">🎁 Objet</option><option value="other">⭐ Autre</option></select></div><div class="field"><label for="rw">Récompense</label><input id="rw" placeholder="Ex. 30 min de console ou 5" value="${esc(source.reward_type==='money'?source.reward_amount||'':source.reward_text||'')}"></div>`}<div class="field"><label for="pts">Points gagnés</label><input id="pts" type="number" min="0" placeholder="Ex. 10" value="${source.points_reward||0}"></div><div class="field"><label for="pen">Conséquence si non terminée</label><input id="pen" placeholder="Facultatif" value="${esc(source.penalty||'')}"></div><div class="field"><label for="dead">Échéance</label><input id="dead" type="datetime-local"></div><button id="saveq">${editing?'Enregistrer':duplicate?'Créer la copie':'Créer'}</button></div>`;
@@ -233,7 +356,7 @@ async function enablePush(){
 }
 
 $("bell").onclick=async()=>{current="home";show("home");$("home").insertAdjacentHTML("afterbegin",'<h3>🔔 Notifications</h3>'+state.notifications.map(n=>`<div class="note ${n.read_at?"":"unread"}"><b>${esc(n.title)}</b><p>${esc(n.message)}</p><small>${fmt(n.created_at)}</small></div>`).join(""));try{await api("mark_notifications_read");$("bellCount").textContent="0"}catch{}};
-async function load(force=false){if(!session)return authView();const seq=++loadSeq;try{const next=await api("state");if(seq!==loadSeq)return;if(!force&&hasUnsavedWork()){state=next;return}state=next;render()}catch(e){if(seq!==loadSeq)return;if(String(e.message).includes("Session")){localStorage.removeItem("qf_session");session="";authView()}else alert(e.message)}}
+async function load(force=false){if(!session)return authView();const seq=++loadSeq;try{const [next,prefs]=await Promise.all([api("state"),rpcV44("qf_v52_profile_preferences",{}).catch(()=>null)]);if(seq!==loadSeq)return;if(prefs){next.me.profile_color=prefs.profile_color||"violet";next.profile_colors=Object.fromEntries((prefs.member_colors||[]).map(x=>[x.person_id,x.profile_color||"violet"]))}else{next.me.profile_color="violet";next.profile_colors={}}if(!force&&hasUnsavedWork()){state=next;return}state=next;render()}catch(e){if(seq!==loadSeq)return;if(String(e.message).includes("Session")){localStorage.removeItem("qf_session");session="";authView()}else alert(e.message)}}
 function show(id){current=id;document.querySelectorAll(".tab").forEach(x=>x.classList.add("hidden"));$(id).classList.remove("hidden");document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===id))}
 document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>show(b.dataset.tab));
 window.submitQ=async id=>{try{await api("submit_quest",{quest_id:id});toast("Quête envoyée au parent ✅");load(true)}catch(e){alert(e.message)}};
