@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="QuestiFamille">
 <link rel="icon" href="/icon-192.png" sizes="192x192">
 <link rel="apple-touch-icon" href="/icon-192.png">
-<title>QuestiFamille V5.5</title>
+<title>QuestiFamille V5.7</title>
 <style>
 :root{--p:#5b4cf0;--p2:#7c3aed;--p3:#2563eb;--bg:#f5f6fb;--text:#15182a;--muted:#747b90;--line:#e7e9f2;--ok:#16a34a;--bad:#dc2626;--gold:#f59e0b;--card:#fff;--shadow:0 14px 40px rgba(31,35,72,.09)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 10% 0%,#ede9fe 0,transparent 25rem),linear-gradient(180deg,#f7f7fc,#f2f4fa);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--text);min-height:100vh}
@@ -330,6 +330,49 @@ details[data-qf-persist]{scroll-margin-top:95px}
   .filter-bar{grid-template-columns:1fr}
 }
 
+
+/* ===== V5.6 — compte & sécurité ===== */
+.account-box{
+  margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:17px;
+  background:var(--surface)
+}
+.account-box h3{margin:0 0 5px}
+.account-grid{display:grid;gap:10px;margin-top:11px}
+.account-section{
+  padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2)
+}
+.account-section h4{margin:0 0 5px;font-size:15px}
+.account-row{
+  display:flex;align-items:center;gap:10px;justify-content:space-between;
+  padding:10px 0;border-bottom:1px solid var(--line)
+}
+.account-row:last-child{border-bottom:0}
+.account-main{min-width:0;flex:1}
+.account-main b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.account-main small{display:block;margin-top:3px}
+.account-row button{flex:0 0 auto;min-height:36px;padding:7px 10px;font-size:12px}
+.recovery-code{
+  font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:16px;font-weight:900;
+  letter-spacing:.04em;word-break:break-all;background:var(--surface);border:1px dashed var(--p);
+  padding:12px;border-radius:12px;margin:9px 0
+}
+.security-note{
+  padding:10px 11px;border-radius:12px;border:1px solid #f5d8a8;
+  background:var(--orange-bg);font-size:12px
+}
+.auth-switch{
+  margin-top:14px;padding-top:13px;border-top:1px solid var(--line);display:grid;gap:8px
+}
+.auth-switch button{width:100%}
+.export-actions{display:flex;gap:8px;flex-wrap:wrap}
+.export-actions>*{flex:1;min-width:150px}
+.delete-request.pending{border-color:#f5c0c4;background:var(--danger-bg)}
+.session-current{color:var(--ok);font-weight:800}
+@media(max-width:560px){
+  .account-row{align-items:flex-start;flex-direction:column}
+  .account-row button{width:100%}
+}
+
 </style></head><body>
 <a class="skip-link" href="#mainContent">Aller au contenu</a>
 <div id="netBanner" class="net-banner hidden" role="status" aria-live="polite"></div>
@@ -339,10 +382,10 @@ details[data-qf-persist]{scroll-margin-top:95px}
 <section id="home" class="card tab"></section><section id="quests" class="card tab hidden"></section><section id="shop" class="card tab hidden"></section><section id="family" class="card tab hidden"></section><section id="profile" class="card tab hidden"></section><section id="history" class="card tab hidden"></section>
 </section></main>
 <script>
-// QuestiFamille V5.5 - confort quotidien et affichage stable
-const API="https://lsnfspsdzvjkrwrjfvgl.supabase.co/functions/v1/questifamille",FAMILY_API="https://lsnfspsdzvjkrwrjfvgl.supabase.co/functions/v1/questifamille-family",REST="https://lsnfspsdzvjkrwrjfvgl.supabase.co/rest/v1/rpc",SUPABASE_PUBLIC_KEY="sb_publishable_9P0dRw7wEQkKFXOklf_iNQ_ygN4cfS_",BASE=location.origin+location.pathname,invite=new URLSearchParams(location.search).get("invite"),$=id=>document.getElementById(id);
+// QuestiFamille V5.7 - stabilisation filtres, saisies et compteurs
+const API="https://lsnfspsdzvjkrwrjfvgl.supabase.co/functions/v1/questifamille",FAMILY_API="https://lsnfspsdzvjkrwrjfvgl.supabase.co/functions/v1/questifamille-family",REST="https://lsnfspsdzvjkrwrjfvgl.supabase.co/rest/v1/rpc",SUPABASE_PUBLIC_KEY="sb_publishable_9P0dRw7wEQkKFXOklf_iNQ_ygN4cfS_",BASE=location.origin+location.pathname,$=id=>document.getElementById(id);let invite=new URLSearchParams(location.search).get("invite");
 let session=localStorage.getItem("qf_session")||"",state=null,current="home",loadSeq=0;
-let deferredInstallPrompt=null,swRegistration=null,lastFocusedTab="home";
+let deferredInstallPrompt=null,swRegistration=null,lastFocusedTab="home",accountPanelOpen=false;
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 const fmt=d=>d?new Date(d).toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short"}):"Aucune";
 const labels={family_created:"Famille créée",member_joined:"Membre arrivé",member_role_changed:"Rôle modifié",profile_updated:"Profil modifié",quest_created:"Quête créée",quest_updated:"Quête modifiée",quest_deleted:"Quête supprimée",quest_submitted:"Quête terminée",quest_validated:"Quête validée",quest_refused:"Quête refusée",reward_given:"Récompense remise",points_adjusted:"Points modifiés",shop_item_created:"Article boutique ajouté",shop_item_deleted:"Article boutique retiré",shop_item_redeemed:"Récompense boutique demandée",shop_redemption_approved:"Demande boutique approuvée",shop_redemption_given:"Récompense boutique remise",shop_redemption_cancelled:"Demande boutique annulée",invite_created:"Invitation créée",recurring_quest_created:"Quête récurrente créée",recurring_quest_generated:"Quête récurrente générée",recurring_quest_enabled:"Quête récurrente activée",recurring_quest_disabled:"Quête récurrente mise en pause",member_left:"Membre parti",member_removed:"Membre retiré",ownership_transferred:"Propriété transmise",members_banned_all:"Tous les membres bannis",quest_help_requested:"Demande d’aide",shop_goal_changed:"Objectif boutique modifié"};
@@ -366,7 +409,7 @@ function friendlyError(err){
   if(/timeout|timed out/i.test(raw))
     return "Le serveur met trop de temps à répondre. Réessaie dans quelques secondes.";
   if(/violates|constraint|postgres|syntax|column|relation/i.test(raw))
-    return "Une erreur technique est survenue. Les données n’ont pas été modifiées.";
+    return "L’action n’a pas pu être terminée. Actualise la page pour vérifier l’état actuel.";
   return raw || "Une erreur est survenue. Réessaie.";
 }
 function showError(err){
@@ -385,16 +428,78 @@ function questFilterState(){return readView("quest_filters",{search:"",person:""
 function saveQuestFilters(){
   writeView("quest_filters",{search:$("questSearch")?.value||"",person:$("questPerson")?.value||"",status:$("questStatus")?.value||"all"})
 }
+function assignmentMatchesStatus(a,status){
+  if(!a)return false;
+  if(status==="all")return true;
+  if(status==="failed")return a.status==="failed"||(a.status==="open"&&!!a.refusal_reason);
+  if(status==="open")return a.status==="open"&&!a.refusal_reason;
+  return a.status===status;
+}
+function questMatchesFilters(q,f){
+  const ass=state.assignments.filter(a=>a.quest_id===q.id);
+  const search=(f.search||"").trim().toLowerCase();
+  if(search&&!((q.title||"")+" "+(q.description||"")).toLowerCase().includes(search))return false;
+
+  let relevant;
+  if(f.person) relevant=ass.filter(a=>a.person_id===f.person);
+  else if(["owner","adult"].includes(state.me.role)) relevant=ass;
+  else relevant=ass.filter(a=>a.person_id===state.me.id);
+
+  if(!relevant.length)return false;
+
+  if(f.status==="all")return true;
+  if(f.status==="overdue"){
+    if(!q.deadline||new Date(q.deadline)>=new Date())return false;
+    return relevant.some(a=>a.status==="failed"||a.status==="open");
+  }
+  return relevant.some(a=>assignmentMatchesStatus(a,f.status));
+}
+function applyQuestFiltersDom(){
+  const f={
+    search:$("questSearch")?.value||"",
+    person:$("questPerson")?.value||"",
+    status:$("questStatus")?.value||"all"
+  };
+  let visible=0;
+  document.querySelectorAll("#quests .quest[data-quest-id]").forEach(card=>{
+    const q=state.quests.find(x=>x.id===card.dataset.questId);
+    const show=!!q&&questMatchesFilters(q,f);
+    card.classList.toggle("hidden",!show);
+    if(show)visible++;
+  });
+  const count=$("questFilterCount");
+  if(count)count.textContent=`${visible} quête${visible>1?"s":""} affichée${visible>1?"s":""}`;
+  const empty=$("questFilterEmpty");
+  if(empty)empty.classList.toggle("hidden",visible!==0);
+  saveQuestFilters();
+}
 function historyFilterState(){return readView("history_filters",{who:"",type:"all"})}
 function saveHistoryFilters(){writeView("history_filters",{who:$("histWho")?.value||"",type:$("histType")?.value||"all"})}
 
 async function requestApi(url,action,data={}){const active=document.activeElement,btn=active instanceof HTMLButtonElement?active:null;if(btn)btn.disabled=true;try{const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","x-session-token":session},body:JSON.stringify({action,...data})});const j=await r.json();if(!r.ok)throw new Error(j.error||"Erreur");return j}finally{if(btn&&document.body.contains(btn))btn.disabled=false}}
 async function api(action,data={}){return requestApi(API,action,data)}
 async function familyApi(action,data={}){return requestApi(FAMILY_API,action,data)}
+async function rpcPublic(name,data={}){
+  const r=await fetch(`${REST}/${name}`,{
+    method:"POST",
+    headers:{"Content-Type":"application/json","apikey":SUPABASE_PUBLIC_KEY},
+    body:JSON.stringify(data)
+  });
+  let j=null;try{j=await r.json()}catch{}
+  if(!r.ok){const msg=j?.message||j?.hint||j?.details||"Erreur serveur";throw new Error(msg)}
+  return j;
+}
+function deviceName(){
+  const ua=navigator.userAgent||"";
+  let os=/Android/i.test(ua)?"Android":/iPhone|iPad|iPod/i.test(ua)?"iPhone/iPad":/Windows/i.test(ua)?"Windows":/Mac OS/i.test(ua)?"Mac":/Linux/i.test(ua)?"Linux":"Appareil";
+  let browser=/Edg\//i.test(ua)?"Edge":/Firefox\//i.test(ua)?"Firefox":/Chrome\//i.test(ua)?"Chrome":/Safari\//i.test(ua)?"Safari":"Navigateur";
+  return `${os} • ${browser}`;
+}
+
 async function rpcV44(name,data={}){const r=await fetch(`${REST}/${name}`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_PUBLIC_KEY},body:JSON.stringify({p_session_token:session,...data})});let j=null;try{j=await r.json()}catch{}if(!r.ok){const msg=j?.message||j?.hint||j?.details||"Erreur serveur";throw new Error(msg)}return j}
 function localDateTimeValue(value){if(!value)return"";const d=new Date(value);if(Number.isNaN(d.getTime()))return"";const p=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+"T"+p(d.getHours())+":"+p(d.getMinutes())}
 function deadlineIso(){const v=$("dead")?.value||"";if(!v)return null;const d=new Date(v);return Number.isNaN(d.getTime())?null:d.toISOString()}
-function hasUnsavedWork(){const a=document.activeElement;if(a&&["INPUT","TEXTAREA","SELECT"].includes(a.tagName))return true;if(current==="quests"&&($("qform")?.children.length||0)>0)return true;if(current==="shop"&&($("itemform")?.children.length||0)>0)return true;if(current==="family"&&($("inviteOut")?.textContent||"").trim())return true;if(current==="profile"&&state){const nick=$("nick"),av=$("av");if(nick&&nick.value!==(state.me.nickname||""))return true;if(av&&av.value!==(state.me.avatar_emoji||"🙂"))return true}return false}
+function hasUnsavedWork(){const a=document.activeElement;if(a&&["INPUT","TEXTAREA","SELECT"].includes(a.tagName))return true;if(current==="quests"&&($("qform")?.children.length||0)>0)return true;if(current==="shop"&&($("itemform")?.children.length||0)>0)return true;if(current==="family"&&($("inviteOut")?.textContent||"").trim())return true;if(current==="profile"&&accountPanelOpen)return true;if(current==="profile"&&state){const nick=$("nick"),av=$("av");if(nick&&nick.value!==(state.me.nickname||""))return true;if(av&&av.value!==(state.me.avatar_emoji||"🙂"))return true}return false}
 function draftKey(kind){return state?`qf_draft_${kind}_${state.family.id}_${state.me.id}`:`qf_draft_${kind}`}
 function saveDraft(kind,data){try{localStorage.setItem(draftKey(kind),JSON.stringify({...data,saved_at:Date.now()}))}catch{}}
 function loadDraft(kind){try{return JSON.parse(localStorage.getItem(draftKey(kind))||"null")}catch{return null}}
@@ -403,14 +508,41 @@ function bindDraft(kind,ids,extra=()=>({})){const save=()=>{const data={};ids.fo
 function applyDraft(data,ids){if(!data)return false;ids.forEach(id=>{const el=$(id);if(!el||data[id]===undefined)return;if(el.type==="checkbox")el.checked=!!data[id];else el.value=data[id]});return true}
 function actorName(id){const p=person(id);return p?(p.nickname||p.first_name+" "+p.last_name):"Système"}
 function renderHistoryList(){const box=$("historyList");if(!box)return;const who=$("histWho")?.value||"",type=$("histType")?.value||"all";saveHistoryFilters();let rows=state.history.filter(h=>(!who||h.actor_person_id===who)&&(type==="all"||h.action.startsWith(type)));box.innerHTML=rows.map(h=>`<div class="hist"><b>${esc(labels[h.action]||h.action.replaceAll("_"," "))}</b><br><small>${fmt(h.created_at)} · ${esc(actorName(h.actor_person_id))}</small>${h.details?.title?`<p>${esc(h.details.title)}</p>`:""}${h.details?.reason?`<small>Motif : ${esc(h.details.reason)}</small>`:""}</div>`).join("")||'<p class="muted">Aucun élément avec ces filtres.</p>'}
-function authView(){$("app").classList.add("hidden");$("bell").classList.add("hidden");$("auth").classList.remove("hidden");if(invite){$("auth").innerHTML='<h2>👨‍👩‍👧 Rejoindre une famille</h2><p>Tu as reçu une invitation.</p><div class="field"><label for="jf">Prénom</label><input id="jf" autocomplete="given-name" placeholder="Prénom"></div><div class="field"><label for="jl">Nom</label><input id="jl" autocomplete="family-name" placeholder="Nom"></div><button id="join">Rejoindre</button>';$("join").onclick=async()=>{try{let r=await api("join_invite",{invite,first_name:$("jf").value,last_name:$("jl").value});session=r.session_token;localStorage.setItem("qf_session",session);history.replaceState({},document.title,BASE);load(true)}catch(e){showError(e)}}}else{$("auth").innerHTML='<h2>Créer une famille</h2><div class="field"><label for="fn">Nom de la famille</label><input id="fn" placeholder="Ex. Famille Martin"></div><div class="field"><label for="pf">Prénom du parent</label><input id="pf" autocomplete="given-name" placeholder="Prénom"></div><div class="field"><label for="pl">Nom du parent</label><input id="pl" autocomplete="family-name" placeholder="Nom"></div><button id="create">Créer la famille</button>';$("create").onclick=async()=>{try{let r=await api("create_family",{family_name:$("fn").value,first_name:$("pf").value,last_name:$("pl").value});session=r.session_token;localStorage.setItem("qf_session",session);load(true)}catch(e){showError(e)}}}}
+function authView(){
+  $("app").classList.add("hidden");$("bell").classList.add("hidden");$("auth").classList.remove("hidden");
+  accountPanelOpen=false;
+  if(invite){
+    $("auth").innerHTML='<h2>👨‍👩‍👧 Rejoindre une famille</h2><p>Tu as reçu une invitation.</p><div class="field"><label for="jf">Prénom</label><input id="jf" autocomplete="given-name" placeholder="Prénom"></div><div class="field"><label for="jl">Nom</label><input id="jl" autocomplete="family-name" placeholder="Nom"></div><button id="join">Rejoindre</button><div class="auth-switch"><button id="recoverInstead" class="ghost">🔑 Récupérer un compte existant</button></div>';
+    $("join").onclick=async()=>{try{let r=await api("join_invite",{invite,first_name:$("jf").value,last_name:$("jl").value});session=r.session_token;localStorage.setItem("qf_session",session);history.replaceState({},document.title,BASE);load(true)}catch(e){showError(e)}};
+    $("recoverInstead").onclick=()=>recoveryView();
+  }else{
+    $("auth").innerHTML='<h2>Créer une famille</h2><p class="muted">Première utilisation sur cet appareil.</p><div class="field"><label for="fn">Nom de la famille</label><input id="fn" placeholder="Ex. Famille Martin"></div><div class="field"><label for="pf">Prénom du parent</label><input id="pf" autocomplete="given-name" placeholder="Prénom"></div><div class="field"><label for="pl">Nom du parent</label><input id="pl" autocomplete="family-name" placeholder="Nom"></div><button id="create">Créer la famille</button><div class="auth-switch"><button id="recoverAccount" class="ghost">🔑 J’ai déjà un compte</button></div>';
+    $("create").onclick=async()=>{try{let r=await api("create_family",{family_name:$("fn").value,first_name:$("pf").value,last_name:$("pl").value});session=r.session_token;localStorage.setItem("qf_session",session);load(true)}catch(e){showError(e)}};
+    $("recoverAccount").onclick=()=>recoveryView();
+  }
+}
+function recoveryView(){
+  $("auth").innerHTML=`<h2>🔑 Récupérer mon compte</h2><p>Entre le code de récupération créé depuis ton ancien appareil.</p><div class="field"><label for="recoveryCode">Code de récupération</label><input id="recoveryCode" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="QF-XXXX-XXXX-XXXX-XXXX-XXXX"></div><div class="security-note">🔐 Un code de récupération ne fonctionne qu’une fois. Après connexion, crée un nouveau code dans Profil → Compte & sécurité.</div><button id="recoverNow" style="margin-top:10px">Récupérer le compte</button><button id="backAuth" class="ghost" style="width:100%;margin-top:8px">← Retour</button>`;
+  $("recoverNow").onclick=async()=>{
+    const code=$("recoveryCode").value.trim();
+    if(!code)return showError(new Error("Entre ton code de récupération."));
+    try{
+      const r=await rpcPublic("qf_v56_recover_account",{p_recovery_code:code,p_device_name:deviceName()});
+      session=r.session_token;localStorage.setItem("qf_session",session);invite="";
+      history.replaceState({},document.title,BASE);
+      toast("Compte récupéré sur cet appareil ✅");
+      await load(true);
+    }catch(e){showError(e)}
+  };
+  $("backAuth").onclick=()=>authView();
+}
 function person(id){return state.members.find(m=>m.person_id===id)}function bal(id){return Number(state.balances?.[id]||0)}
 function reward(q){let a=q.reward_type==="money"?"💶 "+Number(q.reward_amount||0).toFixed(2).replace(".",",")+" €":q.reward_type==="none"?"🎯 Aucune":({privilege:"🎮",activity:"🎬",object:"🎁",other:"⭐"}[q.reward_type]||"🎁")+" "+esc(q.reward_text||"Récompense");if(q.points_reward)a+=" · ⭐ "+q.points_reward+" pts";return a}
 function statusInfo(s){return s==="open"?["À faire","st-open","📝"]:s==="submitted"?["En attente","st-submitted","⏳"]:s==="validated"?["Validée","st-validated","✅"]:s==="failed"?["À refaire","st-failed","🔁"]:[s||"Inconnu","st-open","•"]}
 function redemptionLabel(s){return s==="requested"?"Demandée":s==="approved"?"Acceptée":s==="given"?"Remise":s==="cancelled"?"Annulée":s}
 function goalKey(){return "qf_goal_"+state.family.id+"_"+state.me.id}
 function currentGoalId(){const membership=state?.members?.find(m=>m.person_id===state.me.id);return membership?.goal_shop_item_id||localStorage.getItem(goalKey())||""}
-async function setGoalLocal(id){try{await rpcV44("qf_v44_set_shop_goal",{p_item_id:id||null});if(id)localStorage.setItem(goalKey(),id);else localStorage.removeItem(goalKey());await load(true)}catch(e){alert("Impossible d’enregistrer l’objectif : "+e.message)}}
+async function setGoalLocal(id){try{await rpcV44("qf_v44_set_shop_goal",{p_item_id:id||null});if(id)localStorage.setItem(goalKey(),id);else localStorage.removeItem(goalKey());await load(true)}catch(e){showError(e)}}
 function pct(a,b){return b>0?Math.max(0,Math.min(100,Math.round(a/b*100))):100}
 function isToday(d){if(!d)return false;const x=new Date(d),n=new Date();return x.getFullYear()===n.getFullYear()&&x.getMonth()===n.getMonth()&&x.getDate()===n.getDate()}
 function questIcon(q){const t=((q?.title||"")+" "+(q?.description||"")).toLowerCase();if(/devoir|école|ecole|leçon|lecon|révis|revis/.test(t))return"📚";if(/chambre|lit|ranger|linge/.test(t))return"🛏️";if(/vaisselle|cuisine|repas/.test(t))return"🍽️";if(/table/.test(t))return"🥄";if(/poubelle|déchet|dechet/.test(t))return"🗑️";if(/animal|chien|chat/.test(t))return"🐾";if(/sport|exercice/.test(t))return"⚽";return q?.quest_type==="collective"?"🤝":"🎯"}
@@ -526,12 +658,89 @@ window.addEventListener("online",()=>{networkState();if(session)load(false)});
 window.addEventListener("offline",networkState);
 
 function applyPrefs(){const theme=localStorage.getItem("qf_theme")||"light";document.documentElement.dataset.theme=theme;document.documentElement.classList.toggle("reduce-motion",localStorage.getItem("qf_reduce_motion")==="1");syncThemeMeta()}
-function setTheme(v){localStorage.setItem("qf_theme",v);applyPrefs();render()}
-function setReduceMotion(v){localStorage.setItem("qf_reduce_motion",v?"1":"0");applyPrefs();render()}
+function setTheme(v){localStorage.setItem("qf_theme",v);applyPrefs();const b=$("themeToggle");if(b)b.textContent=v==="dark"?"Désactiver":"Activer"}
+function setReduceMotion(v){localStorage.setItem("qf_reduce_motion",v?"1":"0");applyPrefs();const b=$("motionToggle");if(b)b.textContent=v?"Réactiver":"Réduire"}
 applyPrefs();
+
+function accountDate(v){return v?new Date(v).toLocaleString("fr-FR",{dateStyle:"medium",timeStyle:"short"}):"—"}
+async function openAccountTools(){
+  accountPanelOpen=true;
+  const box=$("accountTools");if(!box)return;
+  box.innerHTML='<div class="account-box"><b>Chargement du compte…</b><span class="loading-dot"></span></div>';
+  try{
+    const a=await rpcV44("qf_v56_account_state",{p_device_name:deviceName()});
+    if(!accountPanelOpen||!$("accountTools"))return;
+    const sessions=(a.sessions||[]).map(x=>`<div class="account-row"><div class="account-main"><b>${esc(x.device_name||"Appareil")} ${x.is_current?'<span class="session-current">• Cet appareil</span>':""}</b><small>Dernière activité : ${accountDate(x.last_seen_at)}<br>Connexion créée : ${accountDate(x.created_at)}</small></div>${x.is_current?'<button class="soft" onclick="logoutCurrentDevice()">Se déconnecter</button>':`<button class="bad" onclick="revokeDevice('${x.id}')">Déconnecter</button>`}</div>`).join("");
+    const invitations=(a.invitations||[]);
+    const inviteHtml=a.role==="owner"?`<div class="account-section"><h4>🔗 Invitations de la famille</h4>${invitations.length?invitations.map(i=>`<div class="account-row"><div class="account-main"><b>${i.active?"Invitation active":"Invitation inactive"}</b><small>Créée : ${accountDate(i.created_at)} · Expire : ${accountDate(i.expires_at)} · Utilisations : ${i.uses}/${i.max_uses}</small></div>${i.active?`<button class="bad" onclick="revokeInvite('${i.id}')">Annuler</button>`:""}</div>`).join(""):'<p class="muted">Aucune invitation créée.</p>'}</div>`:"";
+    const deletion=a.deletion_requested_at;
+    box.innerHTML=`<div class="account-box"><div class="section-title"><h3>🔐 Compte & sécurité</h3><button id="closeAccount" class="soft">Fermer</button></div><div class="account-grid"><div class="account-section"><h4>🔑 Récupération du compte</h4><p class="muted">${a.recovery_code_active?"Un code actif existe. Pour des raisons de sécurité, il ne peut pas être réaffiché. Tu peux en générer un nouveau.":"Crée un code et garde-le dans un endroit sûr. Il permet de retrouver ton compte sur un nouveau téléphone."}</p><button id="makeRecovery">${a.recovery_code_active?"♻️ Nouveau code":"🔑 Créer un code"}</button><div id="recoveryOut"></div></div><div class="account-section"><h4>📱 Mes appareils</h4>${sessions||'<p class="muted">Aucun appareil trouvé.</p>'}${(a.sessions||[]).filter(x=>!x.is_current).length>1?'<button id="logoutOthers" class="bad" style="width:100%;margin-top:8px">Déconnecter tous les autres appareils</button>':""}</div>${inviteHtml}<div class="account-section"><h4>📦 Mes données</h4><p class="muted">Télécharge une copie JSON des informations accessibles dans ton compte QuestiFamille.</p><div class="export-actions"><button id="exportData" class="ghost">⬇️ Exporter mes données</button></div></div><div class="account-section delete-request ${deletion?"pending":""}"><h4>🗑️ Suppression du compte</h4>${deletion?`<p>Demande enregistrée le <b>${accountDate(deletion)}</b>.</p><p class="muted">La demande est marquée comme en attente. Tu peux l’annuler tant qu’elle n’a pas été traitée.</p><button id="cancelDeleteRequest" class="ghost">Annuler la demande</button>`:`<p class="muted">Enregistre une demande de suppression de ton compte. Cela ne supprime pas immédiatement la famille ni les données des autres membres.</p><button id="requestDeleteAccount" class="bad">Demander la suppression</button>`}</div></div></div>`;
+    $("closeAccount").onclick=()=>{accountPanelOpen=false;$("accountTools").innerHTML=""};
+    $("makeRecovery").onclick=generateRecoveryCode;
+    if($("logoutOthers"))$("logoutOthers").onclick=()=>logoutOtherDevices(a.sessions||[]);
+    $("exportData").onclick=exportAccountData;
+    if($("requestDeleteAccount"))$("requestDeleteAccount").onclick=requestAccountDeletion;
+    if($("cancelDeleteRequest"))$("cancelDeleteRequest").onclick=cancelAccountDeletion;
+  }catch(e){box.innerHTML="";accountPanelOpen=false;showError(e)}
+}
+async function generateRecoveryCode(){
+  if(!confirm("Créer un nouveau code ? L’ancien code de récupération deviendra inutilisable."))return;
+  try{
+    const r=await rpcV44("qf_v56_generate_recovery_code",{});
+    const out=$("recoveryOut");if(!out)return;
+    out.innerHTML=`<div class="recovery-code">${esc(r.recovery_code)}</div><div class="security-note">⚠️ Copie ce code maintenant. QuestiFamille ne pourra pas te le réafficher plus tard.</div><button id="copyRecovery" class="ghost" style="width:100%;margin-top:8px">📋 Copier le code</button>`;
+    $("copyRecovery").onclick=async()=>{try{await navigator.clipboard.writeText(r.recovery_code);toast("Code copié 🔑")}catch{showError(new Error("Impossible de copier automatiquement. Maintiens le doigt sur le code pour le copier."))}};
+  }catch(e){showError(e)}
+}
+async function revokeDevice(id){
+  if(!confirm("Déconnecter cet appareil ? Il devra utiliser un code de récupération pour revenir sur ce compte."))return;
+  try{await rpcV44("qf_v56_revoke_session",{p_session_id:id});toast("Appareil déconnecté 🔒");openAccountTools()}catch(e){showError(e)}
+}
+async function logoutOtherDevices(sessions){
+  const others=sessions.filter(x=>!x.is_current);
+  if(!others.length)return;
+  if(!confirm(`Déconnecter ${others.length} autre${others.length>1?"s":""} appareil${others.length>1?"s":""} ?`))return;
+  try{
+    for(const x of others)await rpcV44("qf_v56_revoke_session",{p_session_id:x.id});
+    toast("Autres appareils déconnectés 🔒");openAccountTools();
+  }catch(e){showError(e)}
+}
+async function logoutCurrentDevice(){
+  if(!confirm("Se déconnecter de cet appareil ?"))return;
+  try{
+    const a=await rpcV44("qf_v56_account_state",{p_device_name:deviceName()});
+    await rpcV44("qf_v56_revoke_session",{p_session_id:a.current_session_id});
+  }catch{}
+  localStorage.removeItem("qf_session");session="";state=null;accountPanelOpen=false;authView();
+}
+async function revokeInvite(id){
+  if(!confirm("Annuler cette invitation ? Le lien ne permettra plus de rejoindre la famille."))return;
+  try{await rpcV44("qf_v56_revoke_invitation",{p_invitation_id:id});toast("Invitation annulée 🔗");openAccountTools()}catch(e){showError(e)}
+}
+async function exportAccountData(){
+  try{
+    const data=await rpcV44("qf_v56_export_data",{});
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob),a=document.createElement("a");
+    const date=new Date().toISOString().slice(0,10);
+    a.href=url;a.download=`QuestiFamille_export_${date}.json`;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);toast("Export téléchargé 📦");
+  }catch(e){showError(e)}
+}
+async function requestAccountDeletion(){
+  if(!confirm("Enregistrer une demande de suppression de ton compte QuestiFamille ?"))return;
+  try{await rpcV44("qf_v56_request_account_deletion",{});toast("Demande enregistrée");openAccountTools()}catch(e){showError(e)}
+}
+async function cancelAccountDeletion(){
+  try{await rpcV44("qf_v56_cancel_account_deletion",{});toast("Demande annulée");openAccountTools()}catch(e){showError(e)}
+}
+
 function render(){
 $("auth").classList.add("hidden");$("app").classList.remove("hidden");$("bell").classList.remove("hidden");const manager=["owner","adult"].includes(state.me.role),owner=state.me.role==="owner",unread=state.notifications.filter(n=>!n.read_at).length;$("bellCount").textContent=unread;$("bell").setAttribute("aria-label",unread?`Notifications, ${unread} non lue${unread>1?"s":""}`:"Notifications");
-const myAss=state.assignments.filter(a=>a.person_id===state.me.id),myOpen=myAss.filter(a=>a.status==="open"),mySubmitted=myAss.filter(a=>a.status==="submitted"),myValidated=myAss.filter(a=>a.status==="validated"),submitted=state.assignments.filter(a=>a.status==="submitted"),toGive=state.assignments.filter(a=>a.status==="validated"&&!a.reward_given);
+const myAss=state.assignments.filter(a=>a.person_id===state.me.id),myOpen=myAss.filter(a=>a.status==="open"),mySubmitted=myAss.filter(a=>a.status==="submitted"),myValidated=myAss.filter(a=>a.status==="validated"),submitted=state.assignments.filter(a=>a.status==="submitted");
+const questToGive=state.assignments.filter(a=>{if(a.status!=="validated"||a.reward_given)return false;const q=state.quests.find(x=>x.id===a.quest_id);return !!q&&q.reward_type!=="none"});
+const shopToGive=state.redemptions.filter(r=>r.status==="approved");
+const toGiveCount=questToGive.length+shopToGive.length;
 const myColor=state.me.profile_color||colorOfPerson(state.me.id),heroBadges=unlockedAchievements().slice(0,3),heroNote=manager?(submitted.length?`${submitted.length} validation${submitted.length>1?"s":""} à regarder`:"Tout est à jour pour le moment ✅"):(myOpen.length?`${myOpen.length} quête${myOpen.length>1?"s":""} à faire`:"Toutes tes quêtes sont faites 🎉");const hero=`<div class="hero profile-hero" style="${profileStyle(myColor)}"><div class="section-kicker">${manager?"Espace parent":"Mon espace"}</div><div class="hero-person"><span class="profile-avatar">${esc(state.me.avatar_emoji||"🙂")}</span><div><h2>Bonjour ${esc(state.me.nickname||state.me.first_name)} 👋</h2><p>Famille <b>${esc(state.family.name)}</b> · <span class="badge">${state.me.role==="owner"?"👑 Créateur / Parent":state.me.role==="adult"?"🧑 Adulte":"👦 Enfant"}</span></p></div></div><p class="hero-note">${heroNote}</p>${heroBadges.length?`<div class="hero-badges">${heroBadges.map(b=>`<span class="hero-badge">${b.icon} ${esc(b.title)}</span>`).join("")}</div>`:""}</div>`;
 if(manager){
   const kids=state.members.filter(m=>m.role==="child");
@@ -539,7 +748,7 @@ if(manager){
   const validations=submitted.slice(0,6).map(a=>{const q=state.quests.find(x=>x.id===a.quest_id),p=person(a.person_id);return `<div class="validation-card"><div class="quest-card-head"><span class="quest-icon">${questIcon(q)}</span><div class="quest-card-main"><b>${esc(q?.title||"Quête")}</b><br><small>${esc(p?.nickname||p?.first_name||"Membre")} · ${q?.points_reward?"⭐ "+q.points_reward+" pts":"Sans points"}</small></div></div><div class="row" style="margin-top:10px"><button class="ok" onclick="reviewQ('${q?.id}','${a.person_id}',true)">✔️ Valider</button><button class="gold" onclick="reviewQ('${q?.id}','${a.person_id}',false)">🔁 À refaire</button></div></div>`}).join("");
   const recentUnique=[];for(const q of state.quests){if(!recentUnique.some(x=>x.title.trim().toLowerCase()===q.title.trim().toLowerCase()))recentUnique.push(q);if(recentUnique.length>=4)break}
   const recentHtml=recentUnique.map(q=>`<div class="quick-recent-item"><span class="quest-icon">${questIcon(q)}</span><div class="quick-recent-main"><b>${esc(q.title)}</b><small>${q.points_reward?`⭐ ${q.points_reward} pts`:"Sans points"} · ${state.assignments.filter(a=>a.quest_id===q.id).length} enfant(s)</small></div><button class="ghost" onclick="quickRepeatQuest('${q.id}')">Réutiliser</button></div>`).join("");
-  $("home").innerHTML=hero+`<div class="parent-priority"><div class="section-title"><h3>⏳ À valider maintenant</h3><span class="badge">${submitted.length}</span></div>${validations||'<div class="mini"><b>✅ Tout est à jour</b><br><small>Aucune validation en attente.</small></div>'}</div><div class="stats compact"><div class="stat"><small>À valider</small><b>${submitted.length}</b></div><div class="stat"><small>À remettre</small><b>${toGive.length}</b></div><div class="stat"><small>Enfants</small><b>${kids.length}</b></div><div class="stat"><small>Quêtes</small><b>${state.quests.length}</b></div></div><div class="quick-create"><div class="quick-create-head"><h3>⚡ Raccourcis</h3><button class="ghost" onclick="openBlankQuest()">➕ Autre</button></div><div class="quick-create-grid"><button class="quick-create-btn" onclick="quickPreset('devoirs')">📚 Devoirs<small>Créer sans tout retaper</small></button><button class="quick-create-btn" onclick="quickPreset('chambre')">🛏️ Chambre<small>Ranger sa chambre</small></button><button class="quick-create-btn" onclick="quickPreset('vaisselle')">🍽️ Vaisselle<small>Aider après le repas</small></button><button class="quick-create-btn" onclick="quickPreset('table')">🥄 Mettre la table<small>Préparer le repas</small></button></div>${recentHtml?`<details class="quick-recent"><summary>🕘 Réutiliser une quête récente</summary><div class="quick-recent-list">${recentHtml}</div></details>`:""}</div><div class="section-title"><h3>Résumé des enfants</h3></div><div class="child-summary">${childCards||'<p>Aucun enfant dans la famille.</p>'}</div>`;
+  $("home").innerHTML=hero+`<div class="parent-priority"><div class="section-title"><h3>⏳ À valider maintenant</h3><span class="badge">${submitted.length}</span></div>${validations||'<div class="mini"><b>✅ Tout est à jour</b><br><small>Aucune validation en attente.</small></div>'}</div><div class="stats compact"><div class="stat"><small>À valider</small><b>${submitted.length}</b></div><div class="stat"><small>À remettre</small><b>${toGiveCount}</b><small>${shopToGive.length?`dont ${shopToGive.length} boutique`:""}</small></div><div class="stat"><small>Enfants</small><b>${kids.length}</b></div><div class="stat"><small>Quêtes</small><b>${state.quests.length}</b></div></div><div class="quick-create"><div class="quick-create-head"><h3>⚡ Raccourcis</h3><button class="ghost" onclick="openBlankQuest()">➕ Autre</button></div><div class="quick-create-grid"><button class="quick-create-btn" onclick="quickPreset('devoirs')">📚 Devoirs<small>Créer sans tout retaper</small></button><button class="quick-create-btn" onclick="quickPreset('chambre')">🛏️ Chambre<small>Ranger sa chambre</small></button><button class="quick-create-btn" onclick="quickPreset('vaisselle')">🍽️ Vaisselle<small>Aider après le repas</small></button><button class="quick-create-btn" onclick="quickPreset('table')">🥄 Mettre la table<small>Préparer le repas</small></button></div>${recentHtml?`<details class="quick-recent"><summary>🕘 Réutiliser une quête récente</summary><div class="quick-recent-list">${recentHtml}</div></details>`:""}</div><div class="section-title"><h3>Résumé des enfants</h3></div><div class="child-summary">${childCards||'<p>Aucun enfant dans la famille.</p>'}</div>`;
 }else{
   const openSorted=myOpen.map(a=>({a,q:state.quests.find(q=>q.id===a.quest_id)})).filter(x=>x.q).sort((x,y)=>{const ax=x.q.deadline?new Date(x.q.deadline).getTime():Infinity,ay=y.q.deadline?new Date(y.q.deadline).getTime():Infinity;return ax-ay});
   const next=openSorted[0],others=openSorted.slice(1,6);
@@ -549,14 +758,14 @@ if(manager){
   const otherHtml=others.map(x=>`<div class="mini"><div class="quest-card-head"><span class="quest-icon">${questIcon(x.q)}</span><div class="quest-card-main"><b>${esc(x.q.title)}</b><br><small>${friendlyDue(x.q.deadline)} ${x.q.points_reward?" · ⭐ "+x.q.points_reward+" pts":""}</small></div></div></div>`).join("");
   $("home").innerHTML=hero+nextHtml+goalHtml+`<div class="stats compact"><div class="stat"><small>Points</small><b>${pointsNow}</b></div><div class="stat"><small>À faire</small><b>${myOpen.length}</b></div><div class="stat"><small>En attente</small><b>${mySubmitted.length}</b></div><div class="stat"><small>Validées</small><b>${myValidated.length}</b></div></div><div class="section-title"><h3>Autres quêtes</h3></div><div class="mini-list">${otherHtml||'<div class="mini"><small>Aucune autre quête.</small></div>'}</div>`;
 }
-const qf=questFilterState();let visibleQuests=state.quests.filter(q=>{const ass=state.assignments.filter(a=>a.quest_id===q.id),mine=ass.find(a=>a.person_id===state.me.id),search=qf.search.trim().toLowerCase(),personOk=!qf.person||ass.some(a=>a.person_id===qf.person),overdue=!!q.deadline&&new Date(q.deadline)<new Date()&&ass.some(a=>["open","failed"].includes(a.status)),statusOk=qf.status==="all"||qf.status==="overdue"&&overdue||ass.some(a=>a.status===qf.status);const searchOk=!search||((q.title||"")+" "+(q.description||"")).toLowerCase().includes(search);return searchOk&&personOk&&statusOk});let qh=visibleQuests.map(q=>{let ass=state.assignments.filter(a=>a.quest_id===q.id),mine=ass.find(a=>a.person_id===state.me.id),actions="",status="";if(mine){const retry=mine.status==="open"&&!!mine.refusal_reason,si=retry?["À refaire","st-failed","🔁"]:statusInfo(mine.status);status=`<div class="status-line"><span class="status ${si[1]}">${si[2]} ${si[0]}</span>${mine.refusal_reason?`<small>Motif : ${esc(mine.refusal_reason)}</small>`:""}</div>`;if(mine.status==="open")actions+=`<div class="row"><button onclick="submitQ('${q.id}')">${retry?"🔁 J’ai refait la quête":"✅ J’ai terminé"}</button><button class="ghost" onclick="helpQ('${q.id}')">🙋 Aide</button></div>`}if(manager){actions+=ass.filter(a=>a.status==="submitted").map(a=>`<div class="row"><button class="ok" onclick="reviewQ('${q.id}','${a.person_id}',true)">✔️ Valider ${esc(person(a.person_id)?.first_name||"")}</button><button class="gold" onclick="reviewQ('${q.id}','${a.person_id}',false)">🔁 À refaire</button></div>`).join("");actions+=ass.filter(a=>a.status==="validated"&&!a.reward_given&&q.reward_type!=="none").map(a=>`<button onclick="rewardQ('${q.id}','${a.person_id}')">🎁 Récompense remise à ${esc(person(a.person_id)?.first_name||"")}</button>`).join("");actions+=`<details class="more-menu"><summary>⋯ Plus d’actions</summary><div class="menu-actions"><button class="ghost" onclick="editQ('${q.id}')">✏️ Modifier</button><button class="soft" onclick="duplicateQ('${q.id}')">📄 Dupliquer</button><button class="bad" onclick="deleteQ('${q.id}')">🗑️ Supprimer</button></div></details>`}return `<div class="quest"><div class="quest-card-head"><span class="quest-icon">${questIcon(q)}</span><div class="quest-card-main"><div class="quest-title">${esc(q.title)}</div><div class="quest-meta">${q.points_reward?`<span class="badge">⭐ ${q.points_reward} pts</span>`:""}<span class="due">🕒 ${friendlyDue(q.deadline)}</span>${q.deadline&&new Date(q.deadline)<new Date()&&ass.some(a=>["open","failed"].includes(a.status))?`<span class="overdue-chip">⚠️ En retard</span>`:""}</div>${status}</div></div><details class="quest-details" data-qf-persist="${q.id}" ${detailOpen(q.id)?"open":""} ontoggle="rememberDetail(\'${q.id}\',this.open)"><summary>Voir les détails</summary>${q.description?`<p>${esc(q.description)}</p>`:""}<small>${reward(q)}${q.penalty?` · Conséquence : ${esc(q.penalty)}`:""}</small></details><div style="margin-top:10px">${actions}</div></div>`}).join("");
+const qf=questFilterState();let qh=state.quests.map(q=>{let ass=state.assignments.filter(a=>a.quest_id===q.id),mine=ass.find(a=>a.person_id===state.me.id),actions="",status="";if(mine){const retry=mine.status==="open"&&!!mine.refusal_reason,si=retry?["À refaire","st-failed","🔁"]:statusInfo(mine.status);status=`<div class="status-line"><span class="status ${si[1]}">${si[2]} ${si[0]}</span>${mine.refusal_reason?`<small>Motif : ${esc(mine.refusal_reason)}</small>`:""}</div>`;if(mine.status==="open")actions+=`<div class="row"><button onclick="submitQ('${q.id}')">${retry?"🔁 J’ai refait la quête":"✅ J’ai terminé"}</button><button class="ghost" onclick="helpQ('${q.id}')">🙋 Aide</button></div>`}if(manager){actions+=ass.filter(a=>a.status==="submitted").map(a=>`<div class="row"><button class="ok" onclick="reviewQ('${q.id}','${a.person_id}',true)">✔️ Valider ${esc(person(a.person_id)?.first_name||"")}</button><button class="gold" onclick="reviewQ('${q.id}','${a.person_id}',false)">🔁 À refaire</button></div>`).join("");actions+=ass.filter(a=>a.status==="validated"&&!a.reward_given&&q.reward_type!=="none").map(a=>`<button onclick="rewardQ('${q.id}','${a.person_id}')">🎁 Récompense remise à ${esc(person(a.person_id)?.first_name||"")}</button>`).join("");actions+=`<details class="more-menu"><summary>⋯ Plus d’actions</summary><div class="menu-actions"><button class="ghost" onclick="editQ('${q.id}')">✏️ Modifier</button><button class="soft" onclick="duplicateQ('${q.id}')">📄 Dupliquer</button><button class="bad" onclick="deleteQ('${q.id}')">🗑️ Supprimer</button></div></details>`}return `<div class="quest" data-quest-id="${q.id}"><div class="quest-card-head"><span class="quest-icon">${questIcon(q)}</span><div class="quest-card-main"><div class="quest-title">${esc(q.title)}</div><div class="quest-meta">${q.points_reward?`<span class="badge">⭐ ${q.points_reward} pts</span>`:""}<span class="due">🕒 ${friendlyDue(q.deadline)}</span>${q.deadline&&new Date(q.deadline)<new Date()&&ass.some(a=>a.status==="failed"||a.status==="open")?`<span class="overdue-chip">⚠️ En retard</span>`:""}</div>${status}</div></div><details class="quest-details" data-qf-persist="${q.id}" ${detailOpen(q.id)?"open":""} ontoggle="rememberDetail(\'${q.id}\',this.open)"><summary>Voir les détails</summary>${q.description?`<p>${esc(q.description)}</p>`:""}<small>${reward(q)}${q.penalty?` · Conséquence : ${esc(q.penalty)}`:""}</small></details><div style="margin-top:10px">${actions}</div></div>`}).join("");
 let rh=(state.recurring||[]).map(r=>`<div class="recurring"><b>🔁 ${esc(r.title)}</b><p><small>${r.frequency==="daily"?"Tous les jours":"Chaque semaine"} · échéance ${esc(r.due_time||"18:00")} · ⭐ ${r.points_reward||0} pts · ${r.active?"active":"en pause"}</small></p>${manager?`<button class="ghost" onclick="toggleRecurring('${r.id}',${!r.active})">${r.active?"⏸️ Mettre en pause":"▶️ Réactiver"}</button>`:""}</div>`).join("");
-$("quests").innerHTML='<h2>🎯 Quêtes</h2>'+(manager?'<div class="row"><button id="newq">➕ Nouvelle quête</button><button id="newrq" class="ghost">🔁 Quête répétitive</button></div><div id="qform"></div>':'')+`<div class="filter-bar"><input id="questSearch" type="search" placeholder="🔎 Rechercher une quête" value="${esc(qf.search||"")}">${manager?`<select id="questPerson"><option value="">Tous les enfants</option>${state.members.filter(m=>m.role==="child").map(m=>`<option value="${m.person_id}">${esc(m.nickname||m.first_name)}</option>`).join("")}</select>`:""}<select id="questStatus"><option value="all">Tous les statuts</option><option value="open">À faire</option><option value="submitted">À valider</option><option value="validated">Validées</option><option value="failed">À refaire</option><option value="overdue">En retard</option></select></div><div class="filter-summary"><span>${visibleQuests.length} quête${visibleQuests.length>1?"s":""} affichée${visibleQuests.length>1?"s":""}</span><button id="clearQuestFilters" class="soft">Effacer les filtres</button></div>`+(rh?'<h3>🔁 Quêtes répétitives</h3>'+rh:'')+(qh||'<div class="quest-empty">Aucune quête ne correspond à ces filtres.</div>');if(manager){$("newq").onclick=()=>questForm();$("newrq").onclick=()=>recurringForm();}if($("questPerson"))$("questPerson").value=state.members.some(m=>m.person_id===qf.person)?qf.person:"";$("questStatus").value=["all","open","submitted","validated","failed","overdue"].includes(qf.status)?qf.status:"all";const refreshQuestFilters=()=>{saveQuestFilters();render()};$("questSearch").oninput=()=>{saveQuestFilters();clearTimeout(window.__qfFilterTimer);window.__qfFilterTimer=setTimeout(()=>render(),180)};if($("questPerson"))$("questPerson").onchange=refreshQuestFilters;$("questStatus").onchange=refreshQuestFilters;$("clearQuestFilters").onclick=()=>{writeView("quest_filters",{search:"",person:"",status:"all"});render()};
+$("quests").innerHTML='<h2>🎯 Quêtes</h2>'+(manager?'<div class="row"><button id="newq">➕ Nouvelle quête</button><button id="newrq" class="ghost">🔁 Quête répétitive</button></div><div id="qform"></div>':'')+`<div class="filter-bar"><input id="questSearch" type="search" placeholder="🔎 Rechercher une quête" value="${esc(qf.search||"")}">${manager?`<select id="questPerson"><option value="">Tous les enfants</option>${state.members.filter(m=>m.role==="child").map(m=>`<option value="${m.person_id}">${esc(m.nickname||m.first_name)}</option>`).join("")}</select>`:""}<select id="questStatus"><option value="all">Tous les statuts</option><option value="open">À faire</option><option value="submitted">À valider</option><option value="validated">Validées</option><option value="failed">À refaire</option><option value="overdue">En retard</option></select></div><div class="filter-summary"><span id="questFilterCount"></span><button id="clearQuestFilters" class="soft">Effacer les filtres</button></div>`+(rh?'<h3>🔁 Quêtes répétitives</h3>'+rh:'')+qh+'<div id="questFilterEmpty" class="quest-empty hidden">Aucune quête ne correspond à ces filtres.</div>';if(manager){$("newq").onclick=()=>questForm();$("newrq").onclick=()=>recurringForm();}if($("questPerson"))$("questPerson").value=state.members.some(m=>m.person_id===qf.person)?qf.person:"";$("questStatus").value=["all","open","submitted","validated","failed","overdue"].includes(qf.status)?qf.status:"all";$("questSearch").oninput=applyQuestFiltersDom;if($("questPerson"))$("questPerson").onchange=applyQuestFiltersDom;$("questStatus").onchange=applyQuestFiltersDom;$("clearQuestFilters").onclick=()=>{if($("questSearch"))$("questSearch").value="";if($("questPerson"))$("questPerson").value="";$("questStatus").value="all";applyQuestFiltersDom()};applyQuestFiltersDom();
 let items=state.shop.map(i=>{const points=bal(state.me.id),enough=points>=i.points_cost,gid=currentGoalId(),isGoal=gid===i.id,missing=Math.max(0,i.points_cost-points);return `<div class="shopitem ${isGoal?"is-goal":""}">${isGoal?'<span class="goal-ribbon">🎯 Mon objectif</span>':""}<div class="shop-card-head"><span class="shop-emoji">${shopEmoji(i)}</span><div class="shop-card-main"><div class="shop-title">${esc(i.title)}</div><div class="shop-meta"><span class="badge">⭐ ${i.points_cost} points</span></div></div></div>${i.description?`<details class="quest-details"><summary>Conditions / détails</summary><p>${esc(i.description)}</p></details>`:""}${state.me.role==="child"?`<div class="progress"><span style="width:${pct(points,i.points_cost)}%"></span></div>${enough?'<p class="have-enough">✅ Tu peux la prendre maintenant</p>':`<p class="missing">Il te manque ${missing} point${missing>1?"s":""}</p>`}<div class="row"><button class="ghost" onclick="setGoalLocal('${i.id}')">${isGoal?"🎯 Objectif choisi":"🎯 Choisir comme objectif"}</button><button ${enough?"":"disabled"} onclick="redeem('${i.id}')">${enough?"🎁 Prendre":"Encore "+missing+" pts"}</button></div>`:`<details class="more-menu"><summary>⋯ Gérer</summary><div class="menu-actions"><button class="bad" onclick="deleteItem('${i.id}')">🗑️ Retirer</button></div></details>`}</div>`}).join("");
 let reqs=state.redemptions.map(r=>{let item=state.shop.find(i=>i.id===r.shop_item_id),p=person(r.person_id);return `<div class="redeem"><b>${esc(p?.first_name||"Membre")} · ${esc(item?.title||"Récompense")}</b><br><small>${r.points_spent} pts · ${redemptionLabel(r.status)}${r.decision_reason?" · "+esc(r.decision_reason):""}</small>${manager&&r.status!=="given"&&r.status!=="cancelled"?`<div class="row"><button class="ok" onclick="reviewRed('${r.id}','approved')">Approuver</button><button class="gold" onclick="reviewRed('${r.id}','given')">Remise</button><button class="bad" onclick="reviewRed('${r.id}','cancelled')">Annuler</button></div>`:""}</div>`}).join("");
 const myReqs=state.redemptions.filter(r=>r.person_id===state.me.id).map(r=>{let item=state.shop.find(i=>i.id===r.shop_item_id);return `<div class="redeem"><b>${esc(item?.title||"Récompense")}</b><br><small>${redemptionLabel(r.status)} · ${r.points_spent} pts${r.decision_reason?" · "+esc(r.decision_reason):""}</small></div>`}).join("");
 $("shop").innerHTML=`<div class="section-kicker">${manager?"Gestion des récompenses":"Mes récompenses"}</div><h2>🎁 Boutique</h2><p>Tu as <b class="points">⭐ ${bal(state.me.id)} points</b></p>${manager?'<button id="newitem">➕ Ajouter une récompense</button><div id="itemform"></div>':""}<div class="shopgrid">${items||"<p>Aucune récompense pour le moment.</p>"}</div>${manager?`<div class="section-title"><h3>Demandes</h3></div>${reqs||"<p>Aucune demande.</p>"}`:`<div class="my-requests"><div class="section-title"><h3>Mes demandes</h3></div>${myReqs||"<p>Aucune demande pour le moment.</p>"}</div>`}`;if(manager)$("newitem").onclick=()=>{$("itemform").innerHTML='<div class="notice"><div class="draft-note">💾 Brouillon automatique</div><div class="field"><label for="it">Nom de la récompense</label><input id="it" placeholder="Ex. 30 min de console"></div><div class="field"><label for="idc">Conditions ou description</label><textarea id="idc" placeholder="Ex. Après les devoirs, ce week-end…"></textarea></div><div class="field"><label for="ic">Prix en points</label><input id="ic" type="number" min="1" placeholder="Ex. 50"></div><button id="isave">Ajouter la récompense</button></div>';const sd=loadDraft('shop');if(sd)applyDraft(sd,['it','idc','ic']);bindDraft('shop',['it','idc','ic']);$("isave").onclick=async()=>{try{await api("create_shop_item",{title:$("it").value,description:$("idc").value,points_cost:Number($("ic").value)});clearDraft('shop');toast("Récompense ajoutée 🎁");load(true)}catch(e){showError(e)}}};
-$("family").innerHTML=`<div class="section-kicker">Gestion familiale</div><h2>👨‍👩‍👧 ${esc(state.family.name)}</h2><p class="muted">${state.members.length} membre(s) dans la famille</p>`+state.members.map(m=>{const c=colorInfo(colorOfPerson(m.person_id));return `<div class="member member-accent" style="--member-color:${c.main}"><div class="member-main"><span class="avatar" style="border:2px solid ${c.main};background:${c.soft}">${esc(m.avatar_emoji||"🙂")}</span><span style="min-width:0"><b>${esc(m.nickname||m.first_name+" "+m.last_name)}</b><br><small>${m.role==="owner"?"Créateur / propriétaire":m.role==="adult"?"Adulte":"Enfant"} · ⭐ ${bal(m.person_id)} pts</small></span></div><div class="member-actions">${owner&&m.role!=="owner"?`<select class="member-role" data-person-id="${m.person_id}"><option value="child" ${m.role==="child"?"selected":""}>Enfant</option><option value="adult" ${m.role==="adult"?"selected":""}>Adulte</option></select><button class="soft transfer-owner" data-person-id="${m.person_id}">👑 Transmettre</button><button class="bad remove-member" data-person-id="${m.person_id}">Retirer</button>`:""}${manager&&m.role==="child"?`<button class="ghost adjust-points" data-person-id="${m.person_id}">⭐ Points</button>`:""}</div></div>`}).join("")+`<div class="share-card"><b>✨ Partager QuestiFamille</b><p class="muted">Tu peux envoyer le site à quelqu’un. Il pourra créer sa propre famille, sans rejoindre la tienne.</p><div class="row"><button id="shareApp">📤 Partager l’application</button>${owner?'<button id="inviteBtn" class="ghost">🔗 Inviter dans ma famille</button>':''}</div><div id="inviteOut"></div></div><div class="danger-zone ${owner?"critical":""}"><b>${owner?"⚠️ Zone sensible":"Gestion du compte familial"}</b><p class="muted">${owner?"Ces actions touchent toute la famille. Elles demandent une double confirmation.":"Tu peux quitter cette famille. Ton accès sera retiré de cet appareil."}</p>${owner?`<div class="danger-grid"><div class="danger-action"><b>🚫 Bannir tous les autres membres</b><p class="muted">Déconnecte tous les membres sauf toi, retire leurs quêtes actives et annule tous les liens d’invitation actuels. Ils pourront seulement revenir si tu crées plus tard une nouvelle invitation.</p><button id="banAllBtn" class="bad" ${state.members.length<=1?"disabled":""}>🚫 Bannir ${Math.max(0,state.members.length-1)} membre${state.members.length-1>1?"s":""}</button></div><div class="danger-action"><b>🗑️ Supprimer définitivement la famille</b><p class="muted">Supprime les quêtes, points, boutique, historique, invitations et membres de cette famille. Cette action est irréversible.</p><button id="deleteFamilyBtn" class="bad">🗑️ Supprimer la famille</button></div><div class="danger-note">🔐 <span>Seul le propriétaire peut utiliser ces deux actions. Le serveur vérifie aussi ton rôle avant toute suppression.</span></div></div>`:'<button id="leaveBtn" class="bad">🚪 Quitter la famille</button>'}</div>`;
+$("family").innerHTML=`<div class="section-kicker">Gestion familiale</div><h2>👨‍👩‍👧 ${esc(state.family.name)}</h2><p class="muted">${state.members.length} membre(s) dans la famille</p>`+state.members.map(m=>{const c=colorInfo(colorOfPerson(m.person_id));return `<div class="member member-accent" style="--member-color:${c.main}"><div class="member-main"><span class="avatar" style="border:2px solid ${c.main};background:${c.soft}">${esc(m.avatar_emoji||"🙂")}</span><span style="min-width:0"><b>${esc(m.nickname||m.first_name+" "+m.last_name)}</b><br><small>${m.role==="owner"?"Créateur / propriétaire":m.role==="adult"?"Adulte":"Enfant"} · ⭐ ${bal(m.person_id)} pts</small></span></div><div class="member-actions">${owner&&m.role!=="owner"?`<select class="member-role" data-person-id="${m.person_id}"><option value="child" ${m.role==="child"?"selected":""}>Enfant</option><option value="adult" ${m.role==="adult"?"selected":""}>Adulte</option></select><button class="soft transfer-owner" data-person-id="${m.person_id}">👑 Transmettre</button><button class="bad remove-member" data-person-id="${m.person_id}">Retirer</button>`:""}${manager&&m.role==="child"?`<button class="ghost adjust-points" data-person-id="${m.person_id}">⭐ Points</button>`:""}</div></div>`}).join("")+`<div class="share-card"><b>✨ Partager QuestiFamille</b><p class="muted">Tu peux envoyer le site à quelqu’un. Il pourra créer sa propre famille, sans rejoindre la tienne.</p><div class="row"><button id="shareApp">📤 Partager l’application</button>${owner?'<button id="inviteBtn" class="ghost">🔗 Inviter dans ma famille</button>':''}</div><div id="inviteOut"></div>${owner?'<button id="manageInvites" class="soft" style="width:100%;margin-top:8px">⚙️ Gérer les invitations et appareils</button>':""}</div><div class="danger-zone ${owner?"critical":""}"><b>${owner?"⚠️ Zone sensible":"Gestion du compte familial"}</b><p class="muted">${owner?"Ces actions touchent toute la famille. Elles demandent une double confirmation.":"Tu peux quitter cette famille. Ton accès sera retiré de cet appareil."}</p>${owner?`<div class="danger-grid"><div class="danger-action"><b>🚫 Bannir tous les autres membres</b><p class="muted">Déconnecte tous les membres sauf toi, retire leurs quêtes actives et annule tous les liens d’invitation actuels. Ils pourront seulement revenir si tu crées plus tard une nouvelle invitation.</p><button id="banAllBtn" class="bad" ${state.members.length<=1?"disabled":""}>🚫 Bannir ${Math.max(0,state.members.length-1)} membre${state.members.length-1>1?"s":""}</button></div><div class="danger-action"><b>🗑️ Supprimer définitivement la famille</b><p class="muted">Supprime les quêtes, points, boutique, historique, invitations et membres de cette famille. Cette action est irréversible.</p><button id="deleteFamilyBtn" class="bad">🗑️ Supprimer la famille</button></div><div class="danger-note">🔐 <span>Seul le propriétaire peut utiliser ces deux actions. Le serveur vérifie aussi ton rôle avant toute suppression.</span></div></div>`:'<button id="leaveBtn" class="bad">🚪 Quitter la famille</button>'}</div>`;
 if(owner){
   const banBtn=$("banAllBtn");
   if(banBtn)banBtn.onclick=banAllMembers;
@@ -569,9 +778,10 @@ document.querySelectorAll(".remove-member").forEach(el=>el.addEventListener("cli
 document.querySelectorAll(".adjust-points").forEach(el=>el.addEventListener("click",()=>points(el.dataset.personId)));
 $("shareApp").onclick=async()=>{const url=location.origin;try{if(navigator.share){await navigator.share({title:"QuestiFamille",text:"Crée ta propre famille sur QuestiFamille",url})}else{$("inviteOut").innerHTML=`<p class="link">${esc(url)}</p>`}}catch{}};
 if(owner)$("inviteBtn").onclick=async()=>{try{let r=await api("create_invite");$("inviteOut").innerHTML=`<p class="link">${esc(r.link)}</p><button id="copy">📋 Copier le lien</button>`;$("copy").onclick=()=>navigator.clipboard.writeText(r.link)}catch(e){showError(e)}};
+if(owner&&$("manageInvites"))$("manageInvites").onclick=()=>{show("profile");setTimeout(()=>openAccountTools(),0)};
 if(!owner)$("leaveBtn").onclick=async()=>{if(!confirm("Quitter cette famille ? Tu perdras l’accès à ses quêtes et à sa boutique."))return;try{await familyApi("leave_family");localStorage.removeItem("qf_session");session="";location.href=location.origin}catch(e){showError(e)}};
 const allBadges=achievementsForMe(),unlockedCount=allBadges.filter(b=>b.unlocked).length,currentColor=state.me.profile_color||"violet",currentColorInfo=colorInfo(currentColor);
-$("profile").innerHTML=`<div class="section-kicker">Personnalisation V5.2</div><h2>${manager?"🧑 Mon profil parent":"🙂 Mon profil"}</h2><div class="profile-preview" style="${profileStyle(currentColor)}"><span class="profile-preview-avatar" style="${profileStyle(currentColor)}">${esc(state.me.avatar_emoji||"🙂")}</span><div><b>${esc(state.me.nickname||state.me.first_name)}</b><br><small>${state.me.role==="owner"?"👑 Créateur / Parent":state.me.role==="adult"?"🧑 Adulte":"👦 Enfant"} · <span class="profile-chip">🏅 ${unlockedCount}/${allBadges.length} badges</span></small></div></div><div class="field"><label>Choisir un avatar</label><div class="avatar-picker">${AVATAR_PRESETS.map(a=>`<button type="button" class="avatar-choice ${a===(state.me.avatar_emoji||"🙂")?"selected":""}" data-avatar="${a}">${a}</button>`).join("")}</div></div><div class="field"><label for="av">Ou utiliser un autre emoji</label><input id="av" value="${esc(state.me.avatar_emoji||"🙂")}" placeholder="🙂"></div><div class="field"><label for="nick">Surnom</label><input id="nick" value="${esc(state.me.nickname||"")}" placeholder="Ton surnom"></div><div class="field"><label>Couleur du profil</label><div class="color-picker">${Object.entries(PROFILE_COLORS).map(([id,c])=>`<button type="button" class="color-choice ${id===currentColor?"selected":""}" data-color="${id}" title="${c.name}" aria-label="${c.name}" style="background:${c.main}"></button>`).join("")}</div><small>Cette couleur est synchronisée entre tes appareils.</small></div><button id="saveProfile">💾 Enregistrer le profil</button><div class="section-title"><h3>🏅 Mes badges</h3><span class="badge">${unlockedCount}/${allBadges.length}</span></div><div class="badge-grid">${allBadges.map(b=>`<div class="badge-card ${b.unlocked?"unlocked":"locked"}"><div class="badge-icon">${b.unlocked?b.icon:"🔒"}</div><b>${esc(b.title)}</b><small>${esc(b.desc)}</small></div>`).join("")}</div><div class="pref-grid"><div class="pref-row"><span><b>📱 Installer l’application</b><br><small>${isStandalone()?"Installée sur cet appareil":"Accès rapide depuis l’écran d’accueil"}</small></span><button id="installAppBtn" class="ghost">${isStandalone()?"Installée ✅":"Installer"}</button></div><div class="pref-row"><span><b>🌙 Mode sombre</b><br><small>Plus confortable le soir</small></span><button id="themeToggle" class="soft">${document.documentElement.dataset.theme==="dark"?"Désactiver":"Activer"}</button></div><div class="pref-row"><span><b>✨ Réduire les animations</b><br><small>Pour une interface plus calme</small></span><button id="motionToggle" class="soft">${localStorage.getItem("qf_reduce_motion")==="1"?"Réactiver":"Réduire"}</button></div><div class="pref-row"><span><b>🔔 Notifications</b><br><small>Recevoir les rappels du téléphone</small></span><button id="notifyDevice" class="ghost">Activer</button></div></div>`;
+$("profile").innerHTML=`<div class="section-kicker">Personnalisation V5.7</div><h2>${manager?"🧑 Mon profil parent":"🙂 Mon profil"}</h2><div class="profile-preview" style="${profileStyle(currentColor)}"><span class="profile-preview-avatar" style="${profileStyle(currentColor)}">${esc(state.me.avatar_emoji||"🙂")}</span><div><b>${esc(state.me.nickname||state.me.first_name)}</b><br><small>${state.me.role==="owner"?"👑 Créateur / Parent":state.me.role==="adult"?"🧑 Adulte":"👦 Enfant"} · <span class="profile-chip">🏅 ${unlockedCount}/${allBadges.length} badges</span></small></div></div><div class="field"><label>Choisir un avatar</label><div class="avatar-picker">${AVATAR_PRESETS.map(a=>`<button type="button" class="avatar-choice ${a===(state.me.avatar_emoji||"🙂")?"selected":""}" data-avatar="${a}">${a}</button>`).join("")}</div></div><div class="field"><label for="av">Ou utiliser un autre emoji</label><input id="av" value="${esc(state.me.avatar_emoji||"🙂")}" placeholder="🙂"></div><div class="field"><label for="nick">Surnom</label><input id="nick" value="${esc(state.me.nickname||"")}" placeholder="Ton surnom"></div><div class="field"><label>Couleur du profil</label><div class="color-picker">${Object.entries(PROFILE_COLORS).map(([id,c])=>`<button type="button" class="color-choice ${id===currentColor?"selected":""}" data-color="${id}" title="${c.name}" aria-label="${c.name}" style="background:${c.main}"></button>`).join("")}</div><small>Cette couleur est synchronisée entre tes appareils.</small></div><button id="saveProfile">💾 Enregistrer le profil</button><div class="section-title"><h3>🏅 Mes badges</h3><span class="badge">${unlockedCount}/${allBadges.length}</span></div><div class="badge-grid">${allBadges.map(b=>`<div class="badge-card ${b.unlocked?"unlocked":"locked"}"><div class="badge-icon">${b.unlocked?b.icon:"🔒"}</div><b>${esc(b.title)}</b><small>${esc(b.desc)}</small></div>`).join("")}</div><div class="pref-grid"><div class="pref-row"><span><b>📱 Installer l’application</b><br><small>${isStandalone()?"Installée sur cet appareil":"Accès rapide depuis l’écran d’accueil"}</small></span><button id="installAppBtn" class="ghost">${isStandalone()?"Installée ✅":"Installer"}</button></div><div class="pref-row"><span><b>🌙 Mode sombre</b><br><small>Plus confortable le soir</small></span><button id="themeToggle" class="soft">${document.documentElement.dataset.theme==="dark"?"Désactiver":"Activer"}</button></div><div class="pref-row"><span><b>✨ Réduire les animations</b><br><small>Pour une interface plus calme</small></span><button id="motionToggle" class="soft">${localStorage.getItem("qf_reduce_motion")==="1"?"Réactiver":"Réduire"}</button></div><div class="pref-row"><span><b>🔔 Notifications</b><br><small>Recevoir les rappels du téléphone</small></span><button id="notifyDevice" class="ghost">Activer</button></div><div class="pref-row"><span><b>🔐 Compte & sécurité</b><br><small>Récupération, appareils, export et suppression</small></span><button id="accountBtn" class="ghost">Gérer</button></div></div><div id="accountTools"></div>`;
 document.querySelectorAll(".avatar-choice").forEach(b=>b.onclick=()=>{const a=b.dataset.avatar;$("av").value=a;document.querySelectorAll(".avatar-choice").forEach(x=>x.classList.toggle("selected",x===b));const pv=document.querySelector(".profile-preview-avatar");if(pv)pv.textContent=a});
 document.querySelectorAll(".color-choice").forEach(b=>b.onclick=()=>setProfileColor(b.dataset.color));
 $("av").oninput=()=>{document.querySelectorAll(".avatar-choice").forEach(x=>x.classList.toggle("selected",x.dataset.avatar===$("av").value));const pv=document.querySelector(".profile-preview-avatar");if(pv)pv.textContent=$("av").value||"🙂"};
@@ -579,7 +789,7 @@ $("saveProfile").onclick=async()=>{try{await api("update_profile",{nickname:$("n
 $("installAppBtn").onclick=installApp;
 $("themeToggle").onclick=()=>setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");
 $("motionToggle").onclick=()=>setReduceMotion(localStorage.getItem("qf_reduce_motion")!=="1");
-$("notifyDevice").onclick=enablePush;
+$("notifyDevice").onclick=enablePush;$("accountBtn").onclick=openAccountTools;
 const hf=historyFilterState();$("history").innerHTML=`<h2>📜 Historique</h2><div class="hist-tools"><select id="histWho"><option value="">Tous les membres</option>${state.members.map(m=>`<option value="${m.person_id}">${esc(m.nickname||m.first_name+" "+m.last_name)}</option>`).join("")}</select><select id="histType"><option value="all">Toutes les actions</option><option value="quest_">Quêtes</option><option value="shop_">Boutique</option><option value="points_">Points</option><option value="member_">Famille</option><option value="profile_">Profil</option></select></div><div id="historyList"></div>`;$("histWho").value=state.members.some(m=>m.person_id===hf.who)?hf.who:"";$("histType").value=["all","quest_","shop_","points_","member_","profile_"].includes(hf.type)?hf.type:"all";$("histWho").onchange=renderHistoryList;$("histType").onchange=renderHistoryList;renderHistoryList();show(current);if(unread>0&&Notification.permission==="granted"){let n=state.notifications.find(x=>!x.read_at);if(n){const k="qf_local_notif_"+n.id;if(!localStorage.getItem(k)){try{new Notification(n.title,{body:n.message});localStorage.setItem(k,"1")}catch{}}}}
 }
 function questForm(q=null,duplicate=false,preselectedTargets=[],clearDeadline=false){let kids=state.members.filter(m=>m.role==="child"),editing=!!q&&!duplicate,source=q||{};$('qform').innerHTML=`<div class="notice">${editing?'':'<div class="draft-note">💾 Brouillon automatique</div>'}<div class="template-row">${!editing?'<button type="button" class="soft qt-template" data-t="devoirs">📚 Devoirs</button><button type="button" class="soft qt-template" data-t="chambre">🛏️ Chambre</button><button type="button" class="soft qt-template" data-t="vaisselle">🍽️ Vaisselle</button><button type="button" class="soft qt-template" data-t="table">🥄 Mettre la table</button>':''}</div><div class="field"><label for="qt">Titre de la quête</label><input id="qt" placeholder="Ex. Ranger sa chambre" value="${esc(source.title||"")}"></div><div class="field"><label for="qd">Description</label><textarea id="qd" placeholder="Ce qu’il faut faire">${esc(source.description||"")}</textarea></div>${editing?'':`<div class="checklist"><b>Pour qui ?</b>${kids.map(c=>`<label><input class="kidcheck" type="checkbox" value="${c.person_id}"> ${esc(c.first_name+' '+c.last_name)}</label>`).join('')}</div><div class="field"><label for="rt">Type de récompense</label><select id="rt"><option value="none">Aucune récompense</option><option value="money">💶 Argent</option><option value="privilege">🎮 Privilège</option><option value="activity">🎬 Activité</option><option value="object">🎁 Objet</option><option value="other">⭐ Autre</option></select></div><div class="field"><label for="rw">Récompense</label><input id="rw" placeholder="Ex. 30 min de console ou 5" value="${esc(source.reward_type==='money'?source.reward_amount||'':source.reward_text||'')}"></div>`}<div class="field"><label for="pts">Points gagnés</label><input id="pts" type="number" min="0" placeholder="Ex. 10" value="${source.points_reward||0}"></div><div class="field"><label for="pen">Conséquence si non terminée</label><input id="pen" placeholder="Facultatif" value="${esc(source.penalty||'')}"></div><div class="field"><label for="dead">Échéance</label><input id="dead" type="datetime-local"></div><button id="saveq">${editing?'Enregistrer':duplicate?'Créer la copie':'Créer'}</button></div>`;
@@ -623,7 +833,7 @@ async function load(force=false){if(!session)return authView();const seq=++loadS
 function show(id){current=id;lastFocusedTab=id;try{localStorage.setItem("qf_current_tab",id)}catch{}document.querySelectorAll(".tab").forEach(x=>x.classList.add("hidden"));$(id).classList.remove("hidden");document.querySelectorAll("[data-tab]").forEach(b=>{const active=b.dataset.tab===id;b.classList.toggle("active",active);if(active)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});if(window.innerWidth>620)window.scrollTo({top:0,behavior:document.documentElement.classList.contains("reduce-motion")?"auto":"smooth"})}
 document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>show(b.dataset.tab));
 window.submitQ=async id=>{try{await api("submit_quest",{quest_id:id});toast("Quête envoyée au parent ✅");load(true)}catch(e){showError(e)}};
-window.helpQ=async id=>{try{await rpcV44("qf_v44_request_help",{p_quest_id:id});toast("Demande d’aide envoyée aux parents 🙋");await load(true)}catch(e){alert("Impossible d’envoyer la demande d’aide : "+e.message)}};
+window.helpQ=async id=>{try{await rpcV44("qf_v44_request_help",{p_quest_id:id});toast("Demande d’aide envoyée aux parents 🙋");await load(true)}catch(e){showError(e)}};
 window.reviewQ=async(q,p,a)=>{let reason="";if(!a){reason=prompt("Pourquoi cette quête est à refaire ?")||"";if(!reason.trim())return}try{await rpcV44("qf_v44_review_quest",{p_quest_id:q,p_person_id:p,p_approve:a,p_reason:reason});if(a){successBurst();toast("Quête validée 🎉")}else toast("Quête renvoyée à refaire 🔁");load(true)}catch(e){showError(e)}};
 window.rewardQ=async(q,p)=>{try{await api("reward_given",{quest_id:q,person_id:p});toast("Récompense marquée comme remise 🎁");load(true)}catch(e){showError(e)}};
 window.roleChange=async(p,r)=>{try{await api("change_role",{person_id:p,role:r});load(true)}catch(e){showError(e)}};
